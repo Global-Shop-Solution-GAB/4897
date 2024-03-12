@@ -1,0 +1,1167 @@
+Program.Sub.ScreenSU.Start
+Gui.frmIndex..Create
+Gui.frmIndex..Caption("Index Sheet Maintenance")
+Gui.frmIndex..Size(15360,8895)
+Gui.frmIndex..MinX(0)
+Gui.frmIndex..MinY(0)
+Gui.frmIndex..Position(0,0)
+Gui.frmIndex..BackColor(-2147483633)
+Gui.frmIndex..MousePointer(0)
+Gui.frmIndex..Event(UnLoad,frmIndex_UnLoad)
+Gui.frmIndex..Event(Resize,frmIndex_Resize)
+Gui.frmIndex.GsGCIndexH.Create(GsGridControl)
+Gui.frmIndex.GsGCIndexH.Size(15165,2715)
+Gui.frmIndex.GsGCIndexH.Position(30,285)
+Gui.frmIndex.GsGCIndexH.Event(RowCellClick,GsGCIndexH_RowCellClick)
+Gui.frmIndex.GsGCIndexH.Event(KeyPress,GsGCIndexH_KeyPress)
+Gui.frmIndex.GsGCIndexH.Event(KeyPressEnter,GsGCIndexH_KeyPressEnter)
+Gui.frmIndex.GsGCIndexH.TabStop(True)
+Gui.frmIndex.GsGCIndexH.TabIndex(2)
+Gui.frmIndex.GsGCIndexL.Create(GsGridControl)
+Gui.frmIndex.GsGCIndexL.Size(15165,5295)
+Gui.frmIndex.GsGCIndexL.Position(30,3285)
+Gui.frmIndex.GsGCIndexL.Event(KeyPress,GsGCIndexL_KeyPress)
+Gui.frmIndex.GsGCIndexL.Event(KeyPressEnter,GsGCIndexL_KeyPressEnter)
+Gui.frmIndex.GsGCIndexL.TabStop(True)
+Gui.frmIndex.GsGCIndexL.TabIndex(4)
+Gui.frmIndex.lblIndexH.Create(Label,"Index Header:",True,1140,255,0,30,75,True,0,"Arial",8,-2147483633,0)
+Gui.frmIndex.lblIndexL.Create(Label,"Index Lines:",True,1140,255,0,30,3090,True,0,"Arial",8,-2147483633,0)
+Gui.frmIndex.cmd1.Create(Button)
+Gui.frmIndex.cmd1.Visible(False)
+Gui.frmIndex.cmd1.Size(345,255)
+Gui.frmIndex.cmd1.Position(14850,15)
+Gui.frmIndex.cmd1.TabStop(True)
+Gui.frmIndex.cmd1.TabIndex(1)
+Gui.frmIndex.cmd2.Create(Button)
+Gui.frmIndex.cmd2.Visible(False)
+Gui.frmIndex.cmd2.Size(345,255)
+Gui.frmIndex.cmd2.Position(14850,3015)
+Gui.frmIndex.cmd2.TabStop(True)
+Gui.frmIndex.cmd2.TabIndex(3)
+Gui.frmAddMulti..Create
+Gui.frmAddMulti..Caption("Add Multiple Lines")
+Gui.frmAddMulti..Size(15360,2865)
+Gui.frmAddMulti..MinX(0)
+Gui.frmAddMulti..MinY(0)
+Gui.frmAddMulti..Position(0,0)
+Gui.frmAddMulti..BackColor(-2147483633)
+Gui.frmAddMulti..MaxButton(False)
+Gui.frmAddMulti..MinButton(False)
+Gui.frmAddMulti..MousePointer(0)
+Gui.frmAddMulti..Sizeable(False)
+Gui.frmAddMulti..Event(UnLoad,frmAddMulti_UnLoad)
+Gui.frmAddMulti.cmdOK.Create(Button)
+Gui.frmAddMulti.cmdOK.Size(855,375)
+Gui.frmAddMulti.cmdOK.Position(45,2175)
+Gui.frmAddMulti.cmdOK.Caption("OK")
+Gui.frmAddMulti.cmdOK.Event(Click,cmdOK_Click)
+Gui.frmAddMulti.lblNoOfLines.Create(Label,"# of Lines",True,930,255,0,45,90,True,0,"Arial",8,-2147483633,0)
+Gui.frmAddMulti.txtNoOfLines.Create(TextBox,"",True,795,300,0,45,300,True,2,"Arial",8,-2147483643,1)
+Gui.frmAddMulti.txtNoOfLines.NumericOnly(2)
+Gui.frmAddMulti.GsGCDefault.Create(GsGridControl)
+Gui.frmAddMulti.GsGCDefault.Size(15165,1215)
+Gui.frmAddMulti.GsGCDefault.Position(45,930)
+Gui.frmAddMulti.lblDefault.Create(Label,"Default Values",True,1185,255,0,45,705,True,0,"Arial",8,-2147483633,0)
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+	V.Global.bLoadData.Declare
+	V.Global.iHID.Declare(Long,-1)
+	V.Global.sDesignation.Declare
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	
+	V.Local.sIcon.Declare
+	V.Local.sCaption.Declare
+	
+	F.Intrinsic.String.Build("{0}\gss2.ico",V.Caller.GasDir,V.Local.sIcon)
+	Gui.frmIndex..Icon(V.Local.sIcon)
+	Gui.frmAddMulti..Icon(V.Local.sIcon)
+	
+	F.Intrinsic.Control.CallSub(CheckTables)
+
+	Gui.frmIndex..Show
+	F.Intrinsic.Control.CallSub(SetContextMenus)
+	F.Intrinsic.Control.CallSub(LoadIndexH)
+
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.Main.End
+
+Program.Sub.frmIndex_UnLoad.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+
+	F.Intrinsic.Control.End
+
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.frmIndex_UnLoad.End
+
+Program.Sub.frmIndex_Resize.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+
+	V.Local.fW.Declare
+	V.Local.fWBase.Declare
+	V.Local.fH.Declare
+	V.Local.fHBase.Declare
+	V.Local.fX.Declare
+	V.Local.fY.Declare
+	V.Local.fRet.Declare
+
+'	.Size(Width,Heigth)
+'	.Position(X,Y)
+
+	F.Intrinsic.Math.Sub(V.Screen.frmIndex.Width,15360,V.Local.fWBase)
+	F.Intrinsic.Math.Sub(V.Screen.frmIndex.Height,8895,V.Local.fHBase)
+	F.Intrinsic.Math.Div(V.Local.fHBase,2,V.Local.fHBase)
+	'Set size for grids
+	F.Intrinsic.Math.Add(15050,V.Local.fWBase,V.Local.fW)
+	F.Intrinsic.Math.Add(2715,V.Local.fHBase,V.Local.fH)
+	Gui.frmIndex.GsGCIndexH.Size(V.Local.fW,V.Local.fH)
+	F.Intrinsic.Math.Add(15050,V.Local.fWBase,V.Local.fW)
+	F.Intrinsic.Math.Add(5100,V.Local.fHBase,V.Local.fH)
+	Gui.frmIndex.GsGCIndexL.Size(V.Local.fW,V.Local.fH)
+	'Set Position for Lines label
+	F.Intrinsic.Math.Add(V.Screen.frmIndex!GsGCIndexH.Top,V.Screen.frmIndex!GsGCIndexH.Height,85,V.Local.fY)
+	Gui.frmIndex.lblIndexL.Position(V.Screen.frmIndex!lblIndexH.Left,V.Local.fY)
+	'Set Position for Lines grids
+	F.Intrinsic.Math.Add(V.Screen.frmIndex!lblIndexL.Top,V.Screen.frmIndex!lblIndexL.Height,V.Local.fY)
+	Gui.frmIndex.GsGCIndexL.Position(V.Screen.frmIndex!lblIndexH.Left,V.Local.fY)
+
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.frmIndex_Resize.End
+
+Program.Sub.CheckTables.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	
+	V.Local.bExists.Declare
+
+	F.ODBC.Connection!con.TableExists("GAB_4897_INFO",V.Local.bExists)
+	F.Intrinsic.Control.If(V.Local.bExists,=,False)
+		F.ODBC.Connection!con.Execute("CREATE TABLE GAB_4897_INFO(INID IDENTITY,JOB CHAR(6),SUFFIX CHAR(3),QUANTITY INTEGER,STATUS CHAR(20),LINE_WC CHAR(5),POS_WC CHAR(5),CONCRETE_CY NUMERIC(16,4),PRICE NUMERIC(16,4),FREIGHT_PRICE NUMERIC(16,4),PRIMARY KEY(INID));")
+	F.Intrinsic.Control.EndIf
+	
+	F.ODBC.Connection!con.TableExists("GAB_4897_INDEX_H",V.Local.bExists)
+	F.Intrinsic.Control.If(V.Local.bExists,=,False)
+		F.ODBC.Connection!con.Execute("CREATE TABLE GAB_4897_INDEX_H(HID IDENTITY,CONTRACTOR CHAR(100),FED_RD_DIV_NO INTEGER,STATE CHAR(50),PROJECT_NO CHAR(10),HWY_NO CHAR(10),STATE_DIST_NO INTEGER,COUNTY CHAR(50),CONTROL_NO INTEGER,SECTION_NO INTEGER,JOB_NO INTEGER,SEA_JOB_NO CHAR(10),SEA_DRAWN CHAR(10),SEA_CHECKED CHAR(10),SEA_DATE DATETIME,SEA_JOB_NO_2 CHAR(10),SEA_SHEET_NO CHAR(10),PRIMARY KEY(HID));")
+	F.Intrinsic.Control.EndIf
+	
+	F.ODBC.Connection!con.TableExists("GAB_4897_INDEX_L",V.Local.bExists)
+	F.Intrinsic.Control.If(V.Local.bExists,=,False)
+		F.ODBC.Connection!con.Execute("CREATE TABLE GAB_4897_INDEX_L(LID IDENTITY,HID INTEGER,DESIGNATION CHAR(50),SPAN_NO CHAR(10),TYPE_MARK_NO CHAR(10),QUANTITY INTEGER,DESIGN CHAR(10),CASTING CHAR(15),TOT_QTY INTEGER,AT_CL CHAR(10),AT_END CHAR(10),DEPRESSED_QTY INTEGER,DEPRESSED_AT CHAR(10),MIN_REL_PSI INTEGER,MIN_COMP_PSI INTEGER,SKEW CHAR(10),BATTER CHAR(10),GIRDER_DTL_SHEET_NO CHAR(10),DESIGN_REFERENCE CHAR(10),PRIMARY KEY(LID));")
+	F.Intrinsic.Control.EndIf
+	
+	F.ODBC.Connection!con.TableExists("GAB_4897_JOBS_MARKS",V.Local.bExists)
+	F.Intrinsic.Control.If(V.Local.bExists,=,False)
+		F.ODBC.Connection!con.Execute("CREATE TABLE GAB_4897_JOBS_MARKS(JMID IDENTITY,INID INTEGER,LID INTEGER,PRIMARY KEY(JMID));")
+	F.Intrinsic.Control.EndIf
+	
+	F.ODBC.Connection!con.TableExists("GAB_4897_SALE_MARKS",V.Local.bExists)
+	F.Intrinsic.Control.If(V.Local.bExists,=,False)
+		F.ODBC.Connection!con.Execute("CREATE TABLE GAB_4897_SALE_MARKS(SMID IDENTITY,INID INTEGER,LID INTEGER,ORDER_NO_IO CHAR(7),ORDER_NO_SHIP CHAR(7),PRIMARY KEY(SMID));")
+	F.Intrinsic.Control.EndIf
+	
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.CheckTables.End
+
+Program.Sub.frmAddMulti_UnLoad.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+
+	Gui.frmAddMulti..Visible(False)
+
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.frmAddMulti_UnLoad.End
+
+Program.Sub.SetContextMenus.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	
+	Gui.frmIndex..ContextMenuCreate("ctxIndexH")
+	Gui.frmIndex.GsGCIndexH.ContextMenuAttach("ctxIndexH")
+	Gui.frmIndex..ContextMenuAddItem("ctxIndexH","Add",0,"Add Index")
+	Gui.frmIndex..ContextMenuAddItem("ctxIndexH","Delete",0,"Delete Index")
+	Gui.frmIndex..ContextMenuAddItem("ctxIndexH","Refresh",0,"Refresh")
+	Gui.frmIndex..ContextMenuAddItem("ctxIndexH","Export",0,"Export")
+	Gui.frmIndex..ContextMenuAddItem("ctxIndexH","Reset",0,"Reset Columns")
+	Gui.frmIndex..ContextMenuSetItemEventHandler("ctxIndexH","Add","MenuClickAdd")
+	Gui.frmIndex..ContextMenuSetItemEventHandler("ctxIndexH","Delete","MenuClickDelete")
+	Gui.frmIndex..ContextMenuSetItemEventHandler("ctxIndexH","Refresh","LoadIndexH")
+	Gui.frmIndex..ContextMenuSetItemEventHandler("ctxIndexH","Export","MenuClickExport")
+	Gui.frmIndex..ContextMenuSetItemEventHandler("ctxIndexH","Reset","MenuClickResetColumns")
+	
+	Gui.frmIndex..ContextMenuCreate("ctxIndexL")
+	Gui.frmIndex.GsGCIndexL.ContextMenuAttach("ctxIndexL")
+	Gui.frmIndex..ContextMenuAddItem("ctxIndexL","Add",0,"Add Line")
+	Gui.frmIndex..ContextMenuAddItem("ctxIndexL","AddMulti",0,"Add Multi Lines")
+	Gui.frmIndex..ContextMenuAddItem("ctxIndexL","Delete",0,"Delete Line")
+	Gui.frmIndex..ContextMenuAddItem("ctxIndexL","Refresh",0,"Refresh")
+	Gui.frmIndex..ContextMenuAddItem("ctxIndexL","Export",0,"Export")
+	Gui.frmIndex..ContextMenuAddItem("ctxIndexL","Reset",0,"Reset Columns")
+	Gui.frmIndex..ContextMenuSetItemEventHandler("ctxIndexL","Add","MenuClickAdd")
+	Gui.frmIndex..ContextMenuSetItemEventHandler("ctxIndexL","AddMulti","MenuClickAddMulti")
+	Gui.frmIndex..ContextMenuSetItemEventHandler("ctxIndexL","Delete","MenuClickDelete")
+	Gui.frmIndex..ContextMenuSetItemEventHandler("ctxIndexL","Refresh","LoadIndexL")
+	Gui.frmIndex..ContextMenuSetItemEventHandler("ctxIndexL","Export","MenuClickExport")
+	Gui.frmIndex..ContextMenuSetItemEventHandler("ctxIndexL","Reset","MenuClickResetColumns")
+	
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.SetContextMenus.End
+
+Program.Sub.MenuClickAdd.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	
+	V.Local.iID.Declare
+	
+	F.ODBC.Connection!con.OpenCompanyConnection
+	
+	F.Intrinsic.Control.SelectCase(V.Args.MenuName)
+		F.Intrinsic.Control.Case("CTXINDEXH")
+			F.ODBC.Connection!con.ExecuteAndReturn("Select Max(HID) From GAB_4897_INDEX_H;",V.Local.iID)
+			F.Data.DataTable.AddRow("dtIndexH","HID",V.Local.iID.++)
+			F.Intrinsic.Control.CallSub(SaveToDBH)
+			
+		F.Intrinsic.Control.Case("CTXINDEXL")
+			F.Intrinsic.Control.If(V.DataTable.dtIndexL.Exists,=,False)
+				F.ODBC.Connection!con.Close
+				F.Intrinsic.Control.ExitSub
+			F.Intrinsic.Control.EndIf
+			F.ODBC.Connection!con.ExecuteAndReturn("Select Max(LID) From GAB_4897_INDEX_L;",V.Local.iID)
+			F.Data.DataTable.AddRow("dtIndexL","LID",V.Local.iID.++)
+			F.Intrinsic.Control.CallSub(SaveToDBL)
+	F.Intrinsic.Control.EndSelect
+	
+	F.ODBC.Connection!con.Close
+	
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.MenuClickAdd.End
+
+Program.Sub.MenuClickAddMulti.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	
+	V.Local.iID.Declare
+	
+	F.Intrinsic.Control.If(V.DataTable.dtIndexL.Exists,=,False)
+		F.Intrinsic.Control.ExitSub
+	F.Intrinsic.Control.EndIf
+	
+	F.Intrinsic.Control.If(V.DataTable.dtAddLines.Exists)
+		F.Data.DataTable.Close("dtAddLines")
+	F.Intrinsic.Control.EndIf
+	
+	F.ODBC.Connection!con.OpenCompanyConnection
+	
+	F.Intrinsic.Control.SelectCase(V.Args.MenuName)
+		F.Intrinsic.Control.Case("CTXINDEXL")
+			F.Data.DataTable.Clone("dtIndexL","dtAddLines",True)
+			F.Intrinsic.Control.If(V.DataTable.dtIndexL.RowCount--,=,-1)
+				V.Global.sDesignation.Set("")
+			F.Intrinsic.Control.Else
+				Gui.frmIndex.GsGCIndexL.GetCellValueByColumnName("gvIndexL","DESIGNATION",0,V.Global.sDesignation)
+			F.Intrinsic.Control.EndIf
+			F.Data.DataTable.AddRow("dtAddLines","HID",V.Global.iHID,"DESIGNATION",V.Global.sDesignation,"SPAN_NO",0,"QUANTITY",0,"TOT_QTY",0,"DEPRESSED_QTY",0,"MIN_REL_PSI",0,"MIN_COMP_PSI",0)
+			
+			Gui.frmAddMulti.GsGCDefault.AddGridviewFromDatatable("gvAddLines","dtAddLines")
+			Gui.frmAddMulti.GsGCDefault.SuspendLayout()
+			Gui.frmAddMulti.GsGCDefault.SetGridViewProperty("gvAddLines","MultiSelect",True)
+			Gui.frmAddMulti.GsGCDefault.SetGridViewProperty("gvAddLines","AllowSort",True)
+			Gui.frmAddMulti.GsGCDefault.SetGridViewProperty("gvAddLines","AllowFilter",True)
+			Gui.frmAddMulti.GsGCDefault.SetGridViewProperty("gvAddLines","OptionsDetailShowDetailTabs",False)
+			Gui.frmAddMulti.GsGCDefault.SetGridViewProperty("gvAddLines","OptionsViewShowGroupPanel",False)
+			Gui.frmAddMulti.GsGCDefault.SetGridViewProperty("gvAddLines","EnableAppearanceOddRow",True)
+			Gui.frmAddMulti.GsGCDefault.SetGridViewProperty("gvAddLines","OptionsViewColumnAutoWidth",False)
+			Gui.frmAddMulti.GsGCDefault.SetGridViewProperty("gvAddLines","ColumnPanelRowHeight",35)
+			
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","LID","Visible","False")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","HID","Visible","False")
+		
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","LID","Caption","LID")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","HID","Caption","HID")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DESIGNATION","Caption","Designation")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","SPAN_NO","Caption","Span No.")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","TYPE_MARK_NO","Caption","Type & Mark No.")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","QUANTITY","Caption","Quantity")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DESIGN","Caption","Design")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","CASTING","Caption","Cast")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","TOT_QTY","Caption","Total Qty")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","AT_CL","Caption","Strand at CL")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","AT_END","Caption","Strand at End")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DEPRESSED_QTY","Caption","Depressed Quan.")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DEPRESSED_AT","Caption","Depressed At")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","MIN_REL_PSI","Caption","Minimum Release PSI")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","MIN_COMP_PSI","Caption","Min. Comp. 28 Days Strength PSI")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","SKEW","Caption","Skew (Degrees)")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","BATTER","Caption","Batter (Inches)")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","GIRDER_DTL_SHEET_NO","Caption","Girder Detail Sheet No.")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DESIGN_REFERENCE","Caption","Design Reference")
+			
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","LID","HeaderWordWrap","Wrap")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","HID","HeaderWordWrap","Wrap")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DESIGNATION","HeaderWordWrap","Wrap")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","SPAN_NO","HeaderWordWrap","Wrap")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","TYPE_MARK_NO","HeaderWordWrap","Wrap")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","QUANTITY","HeaderWordWrap","Wrap")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DESIGN","HeaderWordWrap","Wrap")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","CASTING","HeaderWordWrap","Wrap")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","TOT_QTY","HeaderWordWrap","Wrap")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","AT_CL","HeaderWordWrap","Wrap")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","AT_END","HeaderWordWrap","Wrap")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DEPRESSED_QTY","HeaderWordWrap","Wrap")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DEPRESSED_AT","HeaderWordWrap","Wrap")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","MIN_REL_PSI","HeaderWordWrap","Wrap")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","MIN_COMP_PSI","HeaderWordWrap","Wrap")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","SKEW","HeaderWordWrap","Wrap")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","BATTER","HeaderWordWrap","Wrap")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","GIRDER_DTL_SHEET_NO","HeaderWordWrap","Wrap")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DESIGN_REFERENCE","HeaderWordWrap","Wrap")
+				
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","LID","MinWidth","65")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","HID","MinWidth","65")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DESIGNATION","MinWidth","100")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","SPAN_NO","MinWidth","65")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","TYPE_MARK_NO","MinWidth","115")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","QUANTITY","MinWidth","85")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DESIGN","MinWidth","85")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","CASTING","MinWidth","85")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","TOT_QTY","MinWidth","85")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","AT_CL","MinWidth","85")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","AT_END","MinWidth","85")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DEPRESSED_QTY","MinWidth","115")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DEPRESSED_AT","MinWidth","115")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","MIN_REL_PSI","MinWidth","85")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","MIN_COMP_PSI","MinWidth","115")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","SKEW","MinWidth","85")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","BATTER","MinWidth","85")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","GIRDER_DTL_SHEET_NO","MinWidth","115")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DESIGN_REFERENCE","MinWidth","115")
+			
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","LID","AllowEdit","False")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","HID","AllowEdit","False")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DESIGNATION","AllowEdit","True")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","SPAN_NO","AllowEdit","True")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","TYPE_MARK_NO","AllowEdit","True")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","QUANTITY","AllowEdit","True")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DESIGN","AllowEdit","True")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","CASTING","AllowEdit","True")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","TOT_QTY","AllowEdit","True")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","AT_CL","AllowEdit","True")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","AT_END","AllowEdit","True")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DEPRESSED_QTY","AllowEdit","True")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DEPRESSED_AT","AllowEdit","True")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","MIN_REL_PSI","AllowEdit","True")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","MIN_COMP_PSI","AllowEdit","True")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","SKEW","AllowEdit","True")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","BATTER","AllowEdit","True")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","GIRDER_DTL_SHEET_NO","AllowEdit","True")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DESIGN_REFERENCE","AllowEdit","True")
+				
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","LID","ReadOnly","True")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","HID","ReadOnly","True")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DESIGNATION","ReadOnly","False")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","SPAN_NO","ReadOnly","False")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","TYPE_MARK_NO","ReadOnly","False")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","QUANTITY","ReadOnly","False")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DESIGN","ReadOnly","False")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","CASTING","ReadOnly","False")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","TOT_QTY","ReadOnly","False")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","AT_CL","ReadOnly","False")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","AT_END","ReadOnly","False")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DEPRESSED_QTY","ReadOnly","False")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DEPRESSED_AT","ReadOnly","False")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","MIN_REL_PSI","ReadOnly","False")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","MIN_COMP_PSI","ReadOnly","False")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","SKEW","ReadOnly","False")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","BATTER","ReadOnly","False")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","GIRDER_DTL_SHEET_NO","ReadOnly","False")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DESIGN_REFERENCE","ReadOnly","False")
+			
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","LID","HeaderFontBold",True)
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","HID","HeaderFontBold",True)
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DESIGNATION","HeaderFontBold",True)
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","SPAN_NO","HeaderFontBold",True)
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","TYPE_MARK_NO","HeaderFontBold",True)
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","QUANTITY","HeaderFontBold",True)
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DESIGN","HeaderFontBold",True)
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","CASTING","HeaderFontBold",True)
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","TOT_QTY","HeaderFontBold",True)
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","AT_CL","HeaderFontBold",True)
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","AT_END","HeaderFontBold",True)
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DEPRESSED_QTY","HeaderFontBold",True)
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DEPRESSED_AT","HeaderFontBold",True)
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","MIN_REL_PSI","HeaderFontBold",True)
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","MIN_COMP_PSI","HeaderFontBold",True)
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","SKEW","HeaderFontBold",True)
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","BATTER","HeaderFontBold",True)
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","GIRDER_DTL_SHEET_NO","HeaderFontBold",True)
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DESIGN_REFERENCE","HeaderFontBold",True)
+			
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","LID","HeaderHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","HID","HeaderHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DESIGNATION","HeaderHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","SPAN_NO","HeaderHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","TYPE_MARK_NO","HeaderHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","QUANTITY","HeaderHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DESIGN","HeaderHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","CASTING","HeaderHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","TOT_QTY","HeaderHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","AT_CL","HeaderHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","AT_END","HeaderHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DEPRESSED_QTY","HeaderHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DEPRESSED_AT","HeaderHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","MIN_REL_PSI","HeaderHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","MIN_COMP_PSI","HeaderHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","SKEW","HeaderHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","BATTER","HeaderHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","GIRDER_DTL_SHEET_NO","HeaderHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DESIGN_REFERENCE","HeaderHAlignment","Center")
+			
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","LID","CellHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","HID","CellHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DESIGNATION","CellHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","SPAN_NO","CellHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","TYPE_MARK_NO","CellHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","QUANTITY","CellHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DESIGN","CellHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","CASTING","CellHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","TOT_QTY","CellHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","AT_CL","CellHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","AT_END","CellHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DEPRESSED_QTY","CellHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DEPRESSED_AT","CellHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","MIN_REL_PSI","CellHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","MIN_COMP_PSI","CellHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","SKEW","CellHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","BATTER","CellHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","GIRDER_DTL_SHEET_NO","CellHAlignment","Center")
+			Gui.frmAddMulti.GsGCDefault.SetColumnProperty("gvAddLines","DESIGN_REFERENCE","CellHAlignment","Center")
+			
+			Gui.frmAddMulti.GsGCDefault.ResumeLayout()
+			Gui.frmAddMulti.GsGCDefault.MainView("gvAddLines")
+			
+			Gui.frmAddMulti.txtNoOfLines.Text(0)
+			Gui.frmAddMulti..Show
+			Gui.frmAddMulti.txtNoOfLines.SetFocus
+	F.Intrinsic.Control.EndSelect
+	
+	F.ODBC.Connection!con.Close
+	
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.MenuClickAddMulti.End
+
+Program.Sub.MenuClickDelete.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	
+	V.Local.iRow.Declare
+	
+	F.Intrinsic.Control.If(V.DataTable.dtIndexL.Exists,=,False)
+		F.Intrinsic.Control.ExitSub
+	F.Intrinsic.Control.EndIf
+	
+	F.ODBC.Connection!con.OpenCompanyConnection
+	
+	F.Intrinsic.Control.SelectCase(V.Args.MenuName)
+		F.Intrinsic.Control.Case("CTXINDEXH")
+			F.Intrinsic.Control.If(V.DataTable.dtIndexH.RowCount,<>,0)
+				Gui.frmIndex.GsGCIndexH.GetSelectedRows("gvIndexH",V.Local.iRow)
+				F.Data.DataTable.DeleteRow("dtIndexH",V.Local.iRow)
+				F.Intrinsic.Control.CallSub(SaveToDBH)
+			F.Intrinsic.Control.EndIf
+			
+		F.Intrinsic.Control.Case("CTXINDEXL")
+			F.Intrinsic.Control.If(V.DataTable.dtIndexL.RowCount,<>,0)
+				Gui.frmIndex.GsGCIndexL.GetSelectedRows("gvIndexL",V.Local.iRow)
+				F.Data.DataTable.DeleteRow("dtIndexL",V.Local.iRow)
+				F.Intrinsic.Control.CallSub(SaveToDBL,"Delete",True)
+			F.Intrinsic.Control.EndIf
+	F.Intrinsic.Control.EndSelect
+	
+	F.ODBC.Connection!con.Close
+	
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.MenuClickDelete.End
+
+Program.Sub.MenuClickExport.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	
+	V.Local.sFileExport.Declare
+	V.Local.bExcel.Declare
+	V.Local.bFileLocked.Declare
+	V.Local.sMsg.Declare
+	V.Local.sForm.Declare
+	V.Local.sControl.Declare
+	
+	F.Intrinsic.Control.If(V.DataTable.dtIndexL.Exists,=,False)
+		F.Intrinsic.Control.ExitSub
+	F.Intrinsic.Control.EndIf
+	
+	F.Intrinsic.Control.SelectCase(V.Args.MenuName)
+		F.Intrinsic.Control.Case("CTXINDEXH")
+			V.Local.sControl.Set("GsGCIndexH")
+		
+		F.Intrinsic.Control.Case("CTXINDEXL")
+			V.Local.sControl.Set("GsGCIndexL")
+	F.Intrinsic.Control.EndSelect
+
+	F.Automation.MSExcel.CheckPresence(V.Local.bExcel)
+	F.Intrinsic.Control.If(V.Local.bExcel)
+		F.Intrinsic.String.Build("{0}\GAB_4897_{1}_Export.xlsx",V.Caller.LocalGssTempDir,V.Local.sControl,V.Local.sFileExport)
+		F.Intrinsic.File.IsFileLocked(V.Local.sFileExport,V.Local.bFileLocked)
+		F.Intrinsic.Control.If(V.Local.bFileLocked)
+			F.Intrinsic.String.Build("File is already open. Please close and export again.{0}File: {1}",V.Ambient.NewLine,V.Local.sFileExport,V.Local.sMsg)
+			F.Intrinsic.UI.Msgbox(V.Local.sMsg,"File In Use")
+		F.Intrinsic.Control.Else
+			Gui.frmIndex.[V.Local.sControl].Export(V.Local.sFileExport,"xlsx")
+			F.Intrinsic.Task.ShellExec(0,"",V.Local.sFileExport,"","",1)
+		F.Intrinsic.Control.EndIf
+	F.Intrinsic.Control.Else
+		F.Intrinsic.String.Build("{0}\GAB_4897_{1}_Export.csv",V.Caller.LocalGssTempDir,V.Local.sControl,V.Local.sFileExport)
+		F.Intrinsic.File.IsFileLocked(V.Local.sFileExport,V.Local.bFileLocked)
+		F.Intrinsic.Control.If(V.Local.bFileLocked)
+			F.Intrinsic.String.Build("File is already open. Please close and export again.{0}File: {1}",V.Ambient.NewLine,V.Local.sFileExport,V.Local.sMsg)
+			F.Intrinsic.UI.Msgbox(V.Local.sMsg,"File In Use")
+		F.Intrinsic.Control.Else
+			Gui.frmIndex.[V.Local.sControl].Export(V.Local.sFileExport,"csv")
+		F.Intrinsic.Control.EndIf
+		F.Intrinsic.Task.ShellExec(0,"",V.Local.sFileExport,"","",1)
+	F.Intrinsic.Control.EndIf
+	
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.EndTry
+Program.Sub.MenuClickExport.End
+
+Program.Sub.MenuClickResetColumns.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	
+	F.Intrinsic.Control.If(V.DataTable.dtIndexL.Exists,=,False)
+		F.Intrinsic.Control.ExitSub
+	F.Intrinsic.Control.EndIf
+	
+	F.Intrinsic.Control.SelectCase(V.Args.MenuName)
+		F.Intrinsic.Control.Case("CTXINDEXH")
+			F.Global.Registry.AddValue(V.Caller.User,V.Caller.CompanyCode,"GVINDEXH",4897,1000,False,"Serialize",False,0,-999.0,1/1/1980,12:00:00 AM,"")
+			
+		F.Intrinsic.Control.Case("CTXINDEXL")
+			F.Global.Registry.AddValue(V.Caller.User,V.Caller.CompanyCode,"GVINDEXL",4897,1000,False,"Serialize",False,0,-999.0,1/1/1980,12:00:00 AM,"")
+	F.Intrinsic.Control.EndSelect
+	
+	V.Global.bLoadData.Set(False)
+	F.Intrinsic.Control.CallSub(cmdRefresh_Click)
+	
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.MenuClickResetColumns.End
+
+Program.Sub.LoadIndexH.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+
+	F.Intrinsic.Control.If(V.DataTable.dtIndexH.Exists)
+		F.Data.DataTable.Close("dtIndexH")
+	F.Intrinsic.Control.EndIf
+	
+	F.ODBC.Connection!con.OpenCompanyConnection
+	
+	F.Data.DataTable.CreateFromSQL("dtIndexH","con","Select HID,Rtrim(CONTRACTOR) As CONTRACTOR,FED_RD_DIV_NO,Rtrim(STATE) As STATE,Rtrim(PROJECT_NO) As PROJECT_NO,Rtrim(HWY_NO) As HWY_NO,STATE_DIST_NO,Rtrim(COUNTY) As COUNTY,CONTROL_NO,SECTION_NO,JOB_NO,Rtrim(SEA_JOB_NO) As SEA_JOB_NO,Rtrim(SEA_DRAWN) As SEA_DRAWN,Rtrim(SEA_CHECKED) As SEA_CHECKED,SEA_DATE,Rtrim(SEA_JOB_NO_2) As SEA_JOB_NO_2,Rtrim(SEA_SHEET_NO) As SEA_SHEET_NO From GAB_4897_INDEX_H Order By HID;",True)
+	
+	F.ODBC.Connection!con.Close
+	
+	Gui.frmIndex.GsGCIndexH.AddGridviewFromDatatable("gvIndexH","dtIndexH")
+	Gui.frmIndex.GsGCIndexH.SuspendLayout()
+	Gui.frmIndex.GsGCIndexH.SetGridViewProperty("gvIndexH","MultiSelect",True)
+	Gui.frmIndex.GsGCIndexH.SetGridViewProperty("gvIndexH","AllowSort",True)
+	Gui.frmIndex.GsGCIndexH.SetGridViewProperty("gvIndexH","AllowFilter",True)
+	Gui.frmIndex.GsGCIndexH.SetGridViewProperty("gvIndexH","OptionsDetailShowDetailTabs",False)
+	Gui.frmIndex.GsGCIndexH.SetGridViewProperty("gvIndexH","OptionsViewShowGroupPanel",False)
+	Gui.frmIndex.GsGCIndexH.SetGridViewProperty("gvIndexH","EnableAppearanceOddRow",True)
+	Gui.frmIndex.GsGCIndexH.SetGridViewProperty("gvIndexH","OptionsViewColumnAutoWidth",False)
+
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","HID","Caption","ID")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","CONTRACTOR","Caption","Contractor")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","FED_RD_DIV_NO","Caption","Fed. Rd. Div. No.")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","STATE","Caption","State")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","PROJECT_NO","Caption","Project No.")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","HWY_NO","Caption","Hwy. No.")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","STATE_DIST_NO","Caption","State Dist. No.")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","COUNTY","Caption","County")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","CONTROL_NO","Caption","Control No.")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SECTION_NO","Caption","Section No.")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","JOB_NO","Caption","Job No.")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_JOB_NO","Caption","Job No. (SEA)")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_DRAWN","Caption","Drawn")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_CHECKED","Caption","Checked")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_DATE","Caption","Date")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_JOB_NO_2","Caption","SEA Job No.")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_SHEET_NO","Caption","Sheet No.")
+	
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","HID","MinWidth","65")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","CONTRACTOR","MinWidth","175")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","FED_RD_DIV_NO","MinWidth","95")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","STATE","MinWidth","65")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","PROJECT_NO","MinWidth","95")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","HWY_NO","MinWidth","65")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","STATE_DIST_NO","MinWidth","95")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","COUNTY","MinWidth","100")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","CONTROL_NO","MinWidth","80")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SECTION_NO","MinWidth","80")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","JOB_NO","MinWidth","65")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_JOB_NO","MinWidth","85")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_DRAWN","MinWidth","85")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_CHECKED","MinWidth","85")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_DATE","MinWidth","95")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_JOB_NO_2","MinWidth","80")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_SHEET_NO","MinWidth","65")
+	
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","HID","AllowEdit","False")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","CONTRACTOR","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","FED_RD_DIV_NO","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","STATE","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","PROJECT_NO","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","HWY_NO","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","STATE_DIST_NO","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","COUNTY","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","CONTROL_NO","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SECTION_NO","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","JOB_NO","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_JOB_NO","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_DRAWN","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_CHECKED","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_DATE","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_JOB_NO_2","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_SHEET_NO","AllowEdit","True")
+		
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","HID","ReadOnly","True")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","CONTRACTOR","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","FED_RD_DIV_NO","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","STATE","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","PROJECT_NO","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","HWY_NO","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","STATE_DIST_NO","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","COUNTY","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","CONTROL_NO","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SECTION_NO","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","JOB_NO","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_JOB_NO","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_DRAWN","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_CHECKED","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_DATE","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_JOB_NO_2","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_SHEET_NO","ReadOnly","False")
+	
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","HID","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","CONTRACTOR","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","FED_RD_DIV_NO","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","STATE","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","PROJECT_NO","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","HWY_NO","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","STATE_DIST_NO","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","COUNTY","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","CONTROL_NO","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SECTION_NO","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","JOB_NO","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_JOB_NO","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_DRAWN","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_CHECKED","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_DATE","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_JOB_NO_2","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_SHEET_NO","HeaderFontBold",True)
+	
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","HID","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","CONTRACTOR","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","FED_RD_DIV_NO","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","STATE","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","PROJECT_NO","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","HWY_NO","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","STATE_DIST_NO","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","COUNTY","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","CONTROL_NO","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SECTION_NO","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","JOB_NO","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_JOB_NO","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_DRAWN","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_CHECKED","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_DATE","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_JOB_NO_2","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_SHEET_NO","HeaderHAlignment","Center")
+	
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","HID","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","CONTRACTOR","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","FED_RD_DIV_NO","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","STATE","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","PROJECT_NO","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","HWY_NO","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","STATE_DIST_NO","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","COUNTY","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","CONTROL_NO","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SECTION_NO","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","JOB_NO","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_JOB_NO","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_DRAWN","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_CHECKED","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_DATE","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_JOB_NO_2","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_SHEET_NO","CellHAlignment","Center")
+
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","SEA_DATE","DisplayCustomDateTime","d")
+	
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","HID","CellForeColor","Blue")
+	
+	Gui.frmIndex.GsGCIndexH.SetColumnProperty("gvIndexH","HID","CellFontUnderline",True)
+	
+	Gui.frmIndex.GsGCIndexH.ResumeLayout()
+	Gui.frmIndex.GsGCIndexH.MainView("gvIndexH")
+
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.LoadIndexH.End
+
+Program.Sub.GsGCIndexH_RowCellClick.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	
+	'When you select the ID populate the lines
+	F.Intrinsic.Control.SelectCase(V.Args.Column)
+		F.Intrinsic.Control.Case("HID")
+			V.Global.iHID.Set(V.Args.CellValue)
+			F.Intrinsic.Control.CallSub(LoadIndexL)
+	F.Intrinsic.Control.EndSelect
+
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.GsGCIndexH_RowCellClick.End
+
+Program.Sub.GsGCIndexH_KeyPress.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	
+	F.Intrinsic.Control.If(V.Args.KEYPRESS,=,9)
+		F.Intrinsic.Control.BlockEvents
+		F.ODBC.Connection!con.OpenCompanyConnection
+		Gui.frmIndex.cmd1.Visible(True)
+		F.Intrinsic.Task.AppActivate(V.Ambient.PID)
+		F.Intrinsic.Task.SendKeys("{ENTER}")
+		Gui.frmIndex.cmd1.SetFocus
+		F.Intrinsic.Task.SendKeys("{TAB}")
+		Gui.frmIndex.cmd1.Visible(False)
+		F.Intrinsic.Control.CallSub(SaveToDBH)
+		F.ODBC.Connection!con.Close
+		F.Intrinsic.Control.UnBlockEvents
+	F.Intrinsic.Control.EndIf
+
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.GsGCIndexH_KeyPress.End
+
+Program.Sub.GsGCIndexH_KeyPressEnter.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	
+	F.Intrinsic.Control.BlockEvents
+	F.ODBC.Connection!con.OpenCompanyConnection
+	Gui.frmIndex.cmd1.Visible(True)
+	F.Intrinsic.Task.AppActivate(V.Ambient.PID)
+	F.Intrinsic.Task.SendKeys("{ENTER}")
+	Gui.frmIndex.cmd1.SetFocus
+	F.Intrinsic.Task.SendKeys("{TAB}")
+	Gui.frmIndex.cmd1.Visible(False)
+	F.Intrinsic.Control.CallSub(SaveToDBH)
+	F.ODBC.Connection!con.Close
+	F.Intrinsic.Control.UnBlockEvents
+
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.GsGCIndexH_KeyPressEnter.End
+
+Program.Sub.SaveToDBH.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+
+	F.Data.DataTable.SaveToDB("dtIndexH","con","GAB_4897_INDEX_H","HID")
+	F.Data.DataTable.AcceptChanges("dtIndexH")
+
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.SaveToDBH.End
+
+Program.Sub.LoadIndexL.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	
+	V.Local.sSQL.Declare
+	
+	F.Intrinsic.Control.If(V.Global.iHID,=,-1)
+		F.Intrinsic.Control.ExitSub
+	F.Intrinsic.Control.EndIf
+
+	F.Intrinsic.Control.If(V.DataTable.dtIndexL.Exists)
+		F.Data.DataTable.Close("dtIndexL")
+	F.Intrinsic.Control.EndIf
+	
+	F.ODBC.Connection!con.OpenCompanyConnection
+	
+	F.Intrinsic.String.Build("Select LID,HID,Rtrim(DESIGNATION) As DESIGNATION,SPAN_NO,Rtrim(TYPE_MARK_NO) As TYPE_MARK_NO,QUANTITY,Rtrim(DESIGN) As DESIGN,Rtrim(CASTING) As CASTING,TOT_QTY,Rtrim(AT_CL) As AT_CL,Rtrim(AT_END) As AT_END,DEPRESSED_QTY,Rtrim(DEPRESSED_AT) As DEPRESSED_AT,MIN_REL_PSI,MIN_COMP_PSI,Rtrim(SKEW) As SKEW,Rtrim(BATTER) As BATTER,Rtrim(GIRDER_DTL_SHEET_NO) As GIRDER_DTL_SHEET_NO,Rtrim(DESIGN_REFERENCE) As DESIGN_REFERENCE From GAB_4897_INDEX_L Where HID = {0} Order By LID;",V.Global.iHID,V.Local.sSQL)
+	F.Data.DataTable.CreateFromSQL("dtIndexL","con",V.Local.sSQL,True)
+	
+	F.ODBC.Connection!con.Close
+	
+	Gui.frmIndex.GsGCIndexL.AddGridviewFromDatatable("gvIndexL","dtIndexL")
+	Gui.frmIndex.GsGCIndexL.SuspendLayout()
+	Gui.frmIndex.GsGCIndexL.SetGridViewProperty("gvIndexL","MultiSelect",True)
+	Gui.frmIndex.GsGCIndexL.SetGridViewProperty("gvIndexL","AllowSort",True)
+	Gui.frmIndex.GsGCIndexL.SetGridViewProperty("gvIndexL","AllowFilter",True)
+	Gui.frmIndex.GsGCIndexL.SetGridViewProperty("gvIndexL","OptionsDetailShowDetailTabs",False)
+	Gui.frmIndex.GsGCIndexL.SetGridViewProperty("gvIndexL","OptionsViewShowGroupPanel",False)
+	Gui.frmIndex.GsGCIndexL.SetGridViewProperty("gvIndexL","EnableAppearanceOddRow",True)
+	Gui.frmIndex.GsGCIndexL.SetGridViewProperty("gvIndexL","OptionsViewColumnAutoWidth",False)
+	Gui.frmIndex.GsGCIndexL.SetGridViewProperty("gvIndexL","ColumnPanelRowHeight",35)
+	
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","LID","Visible","False")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","HID","Visible","False")
+
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","LID","Caption","LID")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","HID","Caption","HID")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DESIGNATION","Caption","Designation")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","SPAN_NO","Caption","Span No.")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","TYPE_MARK_NO","Caption","Type & Mark No.")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","QUANTITY","Caption","Quantity")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DESIGN","Caption","Design")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","CASTING","Caption","Cast")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","TOT_QTY","Caption","Total Qty")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","AT_CL","Caption","Strand at CL")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","AT_END","Caption","Strand at End")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DEPRESSED_QTY","Caption","Depressed Quan.")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DEPRESSED_AT","Caption","Depressed Height")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","MIN_REL_PSI","Caption","Minimum Release PSI")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","MIN_COMP_PSI","Caption","Min. Comp. 28 Days Strength PSI")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","SKEW","Caption","Skew (Degrees)")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","BATTER","Caption","Batter (Inches)")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","GIRDER_DTL_SHEET_NO","Caption","Girder Detail Sheet No.")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DESIGN_REFERENCE","Caption","Design Reference")
+	
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","LID","HeaderWordWrap","Wrap")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","HID","HeaderWordWrap","Wrap")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DESIGNATION","HeaderWordWrap","Wrap")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","SPAN_NO","HeaderWordWrap","Wrap")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","TYPE_MARK_NO","HeaderWordWrap","Wrap")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","QUANTITY","HeaderWordWrap","Wrap")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DESIGN","HeaderWordWrap","Wrap")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","CASTING","HeaderWordWrap","Wrap")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","TOT_QTY","HeaderWordWrap","Wrap")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","AT_CL","HeaderWordWrap","Wrap")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","AT_END","HeaderWordWrap","Wrap")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DEPRESSED_QTY","HeaderWordWrap","Wrap")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DEPRESSED_AT","HeaderWordWrap","Wrap")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","MIN_REL_PSI","HeaderWordWrap","Wrap")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","MIN_COMP_PSI","HeaderWordWrap","Wrap")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","SKEW","HeaderWordWrap","Wrap")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","BATTER","HeaderWordWrap","Wrap")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","GIRDER_DTL_SHEET_NO","HeaderWordWrap","Wrap")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DESIGN_REFERENCE","HeaderWordWrap","Wrap")
+		
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","LID","MinWidth","65")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","HID","MinWidth","65")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DESIGNATION","MinWidth","100")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","SPAN_NO","MinWidth","65")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","TYPE_MARK_NO","MinWidth","115")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","QUANTITY","MinWidth","85")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DESIGN","MinWidth","85")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","CASTING","MinWidth","85")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","TOT_QTY","MinWidth","85")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","AT_CL","MinWidth","85")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","AT_END","MinWidth","85")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DEPRESSED_QTY","MinWidth","115")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DEPRESSED_AT","MinWidth","115")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","MIN_REL_PSI","MinWidth","85")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","MIN_COMP_PSI","MinWidth","115")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","SKEW","MinWidth","85")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","BATTER","MinWidth","85")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","GIRDER_DTL_SHEET_NO","MinWidth","115")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DESIGN_REFERENCE","MinWidth","115")
+	
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","LID","AllowEdit","False")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","HID","AllowEdit","False")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DESIGNATION","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","SPAN_NO","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","TYPE_MARK_NO","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","QUANTITY","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DESIGN","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","CASTING","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","TOT_QTY","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","AT_CL","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","AT_END","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DEPRESSED_QTY","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DEPRESSED_AT","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","MIN_REL_PSI","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","MIN_COMP_PSI","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","SKEW","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","BATTER","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","GIRDER_DTL_SHEET_NO","AllowEdit","True")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DESIGN_REFERENCE","AllowEdit","True")
+		
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","LID","ReadOnly","True")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","HID","ReadOnly","True")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DESIGNATION","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","SPAN_NO","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","TYPE_MARK_NO","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","QUANTITY","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DESIGN","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","CASTING","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","TOT_QTY","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","AT_CL","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","AT_END","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DEPRESSED_QTY","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DEPRESSED_AT","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","MIN_REL_PSI","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","MIN_COMP_PSI","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","SKEW","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","BATTER","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","GIRDER_DTL_SHEET_NO","ReadOnly","False")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DESIGN_REFERENCE","ReadOnly","False")
+	
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","LID","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","HID","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DESIGNATION","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","SPAN_NO","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","TYPE_MARK_NO","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","QUANTITY","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DESIGN","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","CASTING","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","TOT_QTY","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","AT_CL","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","AT_END","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DEPRESSED_QTY","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DEPRESSED_AT","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","MIN_REL_PSI","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","MIN_COMP_PSI","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","SKEW","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","BATTER","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","GIRDER_DTL_SHEET_NO","HeaderFontBold",True)
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DESIGN_REFERENCE","HeaderFontBold",True)
+	
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","LID","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","HID","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DESIGNATION","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","SPAN_NO","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","TYPE_MARK_NO","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","QUANTITY","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DESIGN","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","CASTING","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","TOT_QTY","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","AT_CL","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","AT_END","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DEPRESSED_QTY","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DEPRESSED_AT","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","MIN_REL_PSI","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","MIN_COMP_PSI","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","SKEW","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","BATTER","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","GIRDER_DTL_SHEET_NO","HeaderHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DESIGN_REFERENCE","HeaderHAlignment","Center")
+	
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","LID","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","HID","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DESIGNATION","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","SPAN_NO","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","TYPE_MARK_NO","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","QUANTITY","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DESIGN","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","CASTING","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","TOT_QTY","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","AT_CL","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","AT_END","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DEPRESSED_QTY","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DEPRESSED_AT","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","MIN_REL_PSI","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","MIN_COMP_PSI","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","SKEW","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","BATTER","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","GIRDER_DTL_SHEET_NO","CellHAlignment","Center")
+	Gui.frmIndex.GsGCIndexL.SetColumnProperty("gvIndexL","DESIGN_REFERENCE","CellHAlignment","Center")
+	
+	Gui.frmIndex.GsGCIndexL.ResumeLayout()
+	Gui.frmIndex.GsGCIndexL.MainView("gvIndexL")
+
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.LoadIndexL.End
+
+Program.Sub.GsGCIndexL_KeyPress.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	
+	F.Intrinsic.Control.If(V.Args.KEYPRESS,=,9)
+		F.Intrinsic.Control.BlockEvents
+		F.ODBC.Connection!con.OpenCompanyConnection
+		Gui.frmIndex.cmd2.Visible(True)
+		F.Intrinsic.Task.AppActivate(V.Ambient.PID)
+		F.Intrinsic.Task.SendKeys("{ENTER}")
+		Gui.frmIndex.cmd2.SetFocus
+		F.Intrinsic.Task.SendKeys("{TAB}")
+		Gui.frmIndex.cmd2.Visible(False)
+		F.Intrinsic.Control.CallSub(SaveToDBL)
+		F.ODBC.Connection!con.Close
+		F.Intrinsic.Control.UnBlockEvents
+	F.Intrinsic.Control.EndIf
+
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.GsGCIndexL_KeyPress.End
+
+Program.Sub.GsGCIndexL_KeyPressEnter.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	
+	F.Intrinsic.Control.BlockEvents
+	F.ODBC.Connection!con.OpenCompanyConnection
+	Gui.frmIndex.cmd2.Visible(True)
+	F.Intrinsic.Task.AppActivate(V.Ambient.PID)
+	F.Intrinsic.Task.SendKeys("{ENTER}")
+	Gui.frmIndex.cmd2.SetFocus
+	F.Intrinsic.Task.SendKeys("{TAB}")
+	Gui.frmIndex.cmd2.Visible(False)
+	F.Intrinsic.Control.CallSub(SaveToDBL)
+	F.ODBC.Connection!con.Close
+	F.Intrinsic.Control.UnBlockEvents
+
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.GsGCIndexL_KeyPressEnter.End
+
+Program.Sub.SaveToDBL.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	
+	V.Local.bArgs.Declare
+	
+	F.Intrinsic.Variable.ArgExists("Delete",V.Local.bArgs)
+	F.Intrinsic.Control.If(V.Local.bArgs)
+		F.Intrinsic.Control.If(V.DataTable.dtIndexL.RowCount--,=,0)
+			F.Data.DataTable.SaveToDB("dtIndexL","con","GAB_4897_INDEX_L","LID")
+			F.Data.DataTable.AcceptChanges("dtIndexL")
+		F.Intrinsic.Control.Else
+			Gui.frmIndex.GsGCIndexL.GetCellValueByColumnName("gvIndexL","DESIGNATION",0,V.Global.sDesignation)
+			F.Data.DataTable.SetValue("dtIndexL",-1,"HID",V.Global.iHID,"DESIGNATION",V.Global.sDesignation)
+			F.Data.DataTable.SaveToDB("dtIndexL","con","GAB_4897_INDEX_L","LID")
+			F.Data.DataTable.AcceptChanges("dtIndexL")
+		F.Intrinsic.Control.EndIf
+	F.Intrinsic.Control.Else
+		Gui.frmIndex.GsGCIndexL.GetCellValueByColumnName("gvIndexL","DESIGNATION",0,V.Global.sDesignation)
+		F.Data.DataTable.SetValue("dtIndexL",-1,"HID",V.Global.iHID,"DESIGNATION",V.Global.sDesignation)
+		F.Data.DataTable.SaveToDB("dtIndexL","con","GAB_4897_INDEX_L","LID")
+		F.Data.DataTable.AcceptChanges("dtIndexL")
+	F.Intrinsic.Control.EndIf
+
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.SaveToDBL.End
+
+Program.Sub.cmdOK_Click.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+
+	V.Local.iCnt.Declare
+	
+	F.Intrinsic.Control.If(V.Screen.frmAddMulti!txtNoOfLines.Text,=,0)
+		F.Intrinsic.Control.ExitSub
+		'Gui.frmAddMulti..Visible(False)
+	F.Intrinsic.Control.EndIf
+	
+	F.Intrinsic.Control.For(V.Local.iCnt,1,V.Screen.frmAddMulti!txtNoOfLines.Text,1)
+		F.Data.DataTable.AddRow("dtIndexL","LID",-1,"HID",V.Global.iHID,"DESIGNATION",V.DataTable.dtAddLines(0).DESIGNATION!FieldValTrim,"SPAN_NO",V.DataTable.dtAddLines(0).SPAN_NO!FieldValTrim,"TYPE_MARK_NO",V.DataTable.dtAddLines(0).TYPE_MARK_NO!FieldValTrim,"QUANTITY",V.DataTable.dtAddLines(0).QUANTITY!FieldValTrim,"DESIGN",V.DataTable.dtAddLines(0).DESIGN!FieldValTrim,"CASTING",V.DataTable.dtAddLines(0).CASTING!FieldValTrim,"TOT_QTY",V.DataTable.dtAddLines(0).TOT_QTY!FieldValTrim,"AT_CL",V.DataTable.dtAddLines(0).AT_CL!FieldValTrim,"AT_END",V.DataTable.dtAddLines(0).AT_END!FieldValTrim,"DEPRESSED_QTY",V.DataTable.dtAddLines(0).DEPRESSED_QTY!FieldValTrim,"DEPRESSED_AT",V.DataTable.dtAddLines(0).DEPRESSED_AT!FieldValTrim,"MIN_REL_PSI",V.DataTable.dtAddLines(0).MIN_REL_PSI!FieldValTrim,"MIN_COMP_PSI",V.DataTable.dtAddLines(0).MIN_COMP_PSI!FieldValTrim,"SKEW",V.DataTable.dtAddLines(0).SKEW!FieldValTrim,"BATTER",V.DataTable.dtAddLines(0).BATTER!FieldValTrim,"GIRDER_DTL_SHEET_NO",V.DataTable.dtAddLines(0).GIRDER_DTL_SHEET_NO!FieldValTrim,"DESIGN_REFERENCE",V.DataTable.dtAddLines(0).DESIGN_REFERENCE!FieldValTrim)
+	F.Intrinsic.Control.Next(V.Local.iCnt)
+	
+	F.ODBC.Connection!con.OpenCompanyConnection
+	F.Intrinsic.Control.CallSub(SaveToDBL)
+	F.ODBC.Connection!con.Close
+	F.Intrinsic.Control.CallSub(LoadIndexL)
+	
+	Gui.frmAddMulti..Visible(False)
+
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.cmdOK_Click.End
+
+Program.Sub.Serialize.Start
+Program.Sub.Serialize.End
+
+Program.Sub.Deserialize.Start
+Program.Sub.Deserialize.End
