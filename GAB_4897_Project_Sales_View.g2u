@@ -1,0 +1,790 @@
+Program.Sub.ScreenSU.Start
+Gui.frmSales..Create
+Gui.frmSales..Caption("Sales Cast")
+Gui.frmSales..Size(15330,7545)
+Gui.frmSales..MinX(0)
+Gui.frmSales..MinY(0)
+Gui.frmSales..Position(0,0)
+Gui.frmSales..BackColor(-2147483633)
+Gui.frmSales..MousePointer(0)
+Gui.frmSales..Event(UnLoad,frmSales_UnLoad)
+Gui.frmSales.tabSales.Create(Tab)
+Gui.frmSales.tabSales.Size(15195,7215)
+Gui.frmSales.tabSales.Position(30,30)
+Gui.frmSales.tabSales.Anchor(15)
+Gui.frmSales.tabSales.Tabs(5)
+Gui.frmSales.tabSales.SetTab(0)
+Gui.frmSales.tabSales.Caption("Approved")
+Gui.frmSales.tabSales.SetTab(1)
+Gui.frmSales.tabSales.Caption("Invoice Only")
+Gui.frmSales.tabSales.SetTab(2)
+Gui.frmSales.tabSales.Caption("Ship")
+Gui.frmSales.tabSales.SetTab(3)
+Gui.frmSales.tabSales.Caption("In Batch")
+Gui.frmSales.tabSales.SetTab(4)
+Gui.frmSales.tabSales.Caption("Posted")
+Gui.frmSales.GsGCApproved.Create(GsGridControl)
+Gui.frmSales.GsGCApproved.Size(15045,6780)
+Gui.frmSales.GsGCApproved.Position(15,15)
+Gui.frmSales.GsGCApproved.Parent("tabSales",0)
+Gui.frmSales.GsGCApproved.Event(RowCellClick,GsGCApproved_RowCellClick)
+Gui.frmSales.cmdCreateSOIO.Create(Button)
+Gui.frmSales.cmdCreateSOIO.Size(2700,330)
+Gui.frmSales.cmdCreateSOIO.Position(10350,0)
+Gui.frmSales.cmdCreateSOIO.Caption("Create Sales Order - Invoice Only")
+Gui.frmSales.cmdCreateSOIO.Anchor(9)
+Gui.frmSales.cmdCreateSOIO.Event(Click,cmdCreateSOIO_Click)
+Gui.frmSales.cmdCreateSOSHIP.Create(Button)
+Gui.frmSales.cmdCreateSOSHIP.Size(2085,330)
+Gui.frmSales.cmdCreateSOSHIP.Position(13110,0)
+Gui.frmSales.cmdCreateSOSHIP.Anchor(9)
+Gui.frmSales.cmdCreateSOSHIP.Caption("Create Sales Order - Ship")
+Gui.frmSales.cmdCreateSOSHIP.Event(Click,cmdCreateSOSHIP_Click)
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+	Program.External.Include.Library("ORDUPL.lib")
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	
+	V.Local.sIcon.Declare
+	V.Local.sSO.Declare
+	
+	F.ODBC.Connection!con.OpenCompanyConnection
+	
+	F.Intrinsic.String.Build("{0}\gss2.ico",V.Caller.GasDir,V.Local.sIcon)
+	Gui.frmSales..Icon(V.Local.sIcon)
+	
+	F.Intrinsic.Control.CallSub(CheckTables)
+	F.Intrinsic.Control.CallSub(SetTabAnchors)
+	F.Intrinsic.Control.CallSub(SetContextMenus)
+	
+	Gui.frmSales.tabSales.SetTab(0)
+	Gui.frmSales.tabSales.TabVisible(1,False)
+	Gui.frmSales.tabSales.TabVisible(2,False)
+	Gui.frmSales.tabSales.TabVisible(3,False)
+	Gui.frmSales.tabSales.TabVisible(4,False)
+	
+	F.Intrinsic.Control.SelectCase(V.Caller.Hook)
+		F.Intrinsic.Control.Case(11560)
+			'SO Header label Script 3 button
+			V.Passed.000203.Set("Cast Info")
+		
+		F.Intrinsic.Control.Case(11930)
+			'SO Header Script 3 button
+			F.Intrinsic.Control.If(V.Passed.000003,<>,"")
+				F.Intrinsic.String.LPad(V.Passed.000003,"0",7,V.Local.sSO)
+				Gui.frmSales.cmdCreateSOIO.Visible(False)
+				Gui.frmSales.cmdCreateSOSHIP.Visible(False)
+				Gui.frmSales..Show
+				F.Intrinsic.Control.CallSub(LoadCast,"SO",V.Local.sSO)
+			F.Intrinsic.Control.Else
+				F.Intrinsic.UI.Msgbox("Please select a Sales Order.","Sales Order Missing")
+				F.ODBC.Connection!con.Close
+				F.Intrinsic.Control.End
+			F.Intrinsic.Control.EndIf
+			
+		F.Intrinsic.Control.Case(35301)
+			'SO View label Script 3 button
+			V.Passed.000148.Set("Cast Info")
+		
+		F.Intrinsic.Control.Case(35304)
+			'SO View Script 3 button
+			F.Intrinsic.Control.If(V.Passed.000022,<>,"")
+				F.Intrinsic.String.LPad(V.Passed.000022,"0",7,V.Local.sSO)
+				Gui.frmSales.cmdCreateSOIO.Visible(False)
+				Gui.frmSales.cmdCreateSOSHIP.Visible(False)
+				Gui.frmSales..Show
+				F.Intrinsic.Control.CallSub(LoadCast,"SO",V.Local.sSO)
+			F.Intrinsic.Control.Else
+				F.Intrinsic.UI.Msgbox("Please select a Sales Order.","Sales Order Missing")
+				F.ODBC.Connection!con.Close
+				F.Intrinsic.Control.End
+			F.Intrinsic.Control.EndIf
+			
+		F.Intrinsic.Control.Case(33001)
+			'SO History label Script 3 button
+			V.Passed.000160.Set("Cast Info")
+		
+		F.Intrinsic.Control.Case(33004)
+			'SO History Script 3 button
+			F.Intrinsic.Control.If(V.Passed.000002,<>,"")
+				F.Intrinsic.String.LPad(V.Passed.000002,"0",7,V.Local.sSO)
+				Gui.frmSales.cmdCreateSOIO.Visible(False)
+				Gui.frmSales.cmdCreateSOSHIP.Visible(False)
+				Gui.frmSales..Show
+				F.Intrinsic.Control.CallSub(LoadCast,"SO",V.Local.sSO)
+			F.Intrinsic.Control.Else
+				F.Intrinsic.UI.Msgbox("Please select a Sales Order.","Sales Order Missing")
+				F.ODBC.Connection!con.Close
+				F.Intrinsic.Control.End
+			F.Intrinsic.Control.EndIf
+		
+		F.Intrinsic.Control.CaseElse
+			Gui.frmSales..Show
+			F.Intrinsic.Control.CallSub(LoadCast)
+	F.Intrinsic.Control.EndSelect
+
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.Main.End
+
+Program.Sub.frmSales_UnLoad.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+
+	F.ODBC.Connection!con.Close
+	F.Intrinsic.Control.End
+
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.frmSales_UnLoad.End
+
+Program.Sub.SetTabAnchors.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+
+	Gui.frmSales.GsGCApproved.Anchor(15)
+
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.SetTabAnchors.End
+
+Program.Sub.CheckTables.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	
+	V.Local.bExists.Declare
+
+	F.ODBC.Connection!con.TableExists("GAB_4897_INFO",V.Local.bExists)
+	F.Intrinsic.Control.If(V.Local.bExists,=,False)
+		 F.ODBC.Connection!con.Execute("CREATE TABLE GAB_4897_INFO(INID IDENTITY,JOB CHAR(6),SUFFIX CHAR(3),QUANTITY INTEGER,STATUS CHAR(20),LINE_WC CHAR(5),POS_WC CHAR(5),CONCRETE_CY NUMERIC(16,4),PRICE NUMERIC(16,4),FREIGHT_PRICE NUMERIC(16,4),PRIMARY KEY(INID));")
+	F.Intrinsic.Control.EndIf
+	
+	F.ODBC.Connection!con.TableExists("GAB_4897_INDEX_H",V.Local.bExists)
+	F.Intrinsic.Control.If(V.Local.bExists,=,False)
+		F.ODBC.Connection!con.Execute("CREATE TABLE GAB_4897_INDEX_H(HID IDENTITY,CONTRACTOR CHAR(100),FED_RD_DIV_NO INTEGER,STATE CHAR(50),PROJECT_NO CHAR(10),HWY_NO CHAR(10),STATE_DIST_NO INTEGER,COUNTY CHAR(50),CONTROL_NO INTEGER,SECTION_NO INTEGER,JOB_NO INTEGER,SEA_JOB_NO CHAR(10),SEA_DRAWN CHAR(10),SEA_CHECKED CHAR(10),SEA_DATE DATETIME,SEA_JOB_NO_2 CHAR(10),SEA_SHEET_NO CHAR(10),PRIMARY KEY(HID));")
+	F.Intrinsic.Control.EndIf
+	
+	F.ODBC.Connection!con.TableExists("GAB_4897_INDEX_L",V.Local.bExists)
+	F.Intrinsic.Control.If(V.Local.bExists,=,False)
+		F.ODBC.Connection!con.Execute("CREATE TABLE GAB_4897_INDEX_L(LID IDENTITY,HID INTEGER,DESIGNATION CHAR(50),SPAN_NO CHAR(10),TYPE_MARK_NO CHAR(10),QUANTITY INTEGER,DESIGN CHAR(10),CASTING CHAR(15),TOT_QTY INTEGER,AT_CL CHAR(10),AT_END CHAR(10),DEPRESSED_QTY INTEGER,DEPRESSED_AT CHAR(10),MIN_REL_PSI INTEGER,MIN_COMP_PSI INTEGER,SKEW CHAR(10),BATTER CHAR(10),GIRDER_DTL_SHEET_NO CHAR(10),DESIGN_REFERENCE CHAR(10),PRIMARY KEY(LID));")
+	F.Intrinsic.Control.EndIf
+	
+	F.ODBC.Connection!con.TableExists("GAB_4897_JOBS_MARKS",V.Local.bExists)
+	F.Intrinsic.Control.If(V.Local.bExists,=,False)
+		F.ODBC.Connection!con.Execute("CREATE TABLE GAB_4897_JOBS_MARKS(JMID IDENTITY,INID INTEGER,LID INTEGER,PRIMARY KEY(JMID));")
+	F.Intrinsic.Control.EndIf
+	
+	F.ODBC.Connection!con.TableExists("GAB_4897_SALE_MARKS",V.Local.bExists)
+	F.Intrinsic.Control.If(V.Local.bExists,=,False)
+		F.ODBC.Connection!con.Execute("CREATE TABLE GAB_4897_SALE_MARKS(SMID IDENTITY,INID INTEGER,LID INTEGER,ORDER_NO_IO CHAR(7),ORDER_NO_SHIP CHAR(7),PRIMARY KEY(SMID));")
+	F.Intrinsic.Control.EndIf
+	
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.CheckTables.End
+
+Program.Sub.SetContextMenus.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	
+	Gui.frmSales..ContextMenuCreate("ctxApproved")
+	Gui.frmSales.GsGCApproved.ContextMenuAttach("ctxApproved")
+	Gui.frmSales..ContextMenuAddItem("ctxApproved","Refresh",0,"Refresh")
+	Gui.frmSales..ContextMenuAddItem("ctxApproved","Export",0,"Export")
+'	Gui.frmSales..ContextMenuAddItem("ctxApproved","Reset",0,"Reset Columns")
+	Gui.frmSales..ContextMenuSetItemEventHandler("ctxApproved","Refresh","LoadCast")
+	Gui.frmSales..ContextMenuSetItemEventHandler("ctxApproved","Export","MenuClickExport")
+'	Gui.frmSales..ContextMenuSetItemEventHandler("ctxApproved","Reset","MenuClickResetColumns")
+	
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.SetContextMenus.End
+
+Program.Sub.MenuClickExport.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	
+	V.Local.sFileExport.Declare
+	V.Local.bExcel.Declare
+	V.Local.bFileLocked.Declare
+	V.Local.sMsg.Declare
+	V.Local.sForm.Declare
+	V.Local.sControl.Declare
+	
+	V.Local.sForm.Set("frmSales")
+	F.Intrinsic.Control.SelectCase(V.Args.MenuName)
+		F.Intrinsic.Control.Case("CTXAPPROVED")
+			V.Local.sControl.Set("GsGCApproved")
+	F.Intrinsic.Control.EndSelect
+
+	F.Automation.MSExcel.CheckPresence(V.Local.bExcel)
+	F.Intrinsic.Control.If(V.Local.bExcel)
+		F.Intrinsic.String.Build("{0}\GAB_4897_{1}_Export.xlsx",V.Caller.LocalGssTempDir,V.Local.sControl,V.Local.sFileExport)
+		F.Intrinsic.File.IsFileLocked(V.Local.sFileExport,V.Local.bFileLocked)
+		F.Intrinsic.Control.If(V.Local.bFileLocked)
+			F.Intrinsic.String.Build("File is already open. Please close and export again.{0}File: {1}",V.Ambient.NewLine,V.Local.sFileExport,V.Local.sMsg)
+			F.Intrinsic.UI.Msgbox(V.Local.sMsg,"File In Use")
+		F.Intrinsic.Control.Else
+			Gui.[V.Local.sForm].[V.Local.sControl].Export(V.Local.sFileExport,"xlsx")
+			F.Intrinsic.Task.ShellExec(0,"",V.Local.sFileExport,"","",1)
+		F.Intrinsic.Control.EndIf
+	F.Intrinsic.Control.Else
+		F.Intrinsic.String.Build("{0}\GAB_4897_{1}_Export.csv",V.Caller.LocalGssTempDir,V.Local.sControl,V.Local.sFileExport)
+		F.Intrinsic.File.IsFileLocked(V.Local.sFileExport,V.Local.bFileLocked)
+		F.Intrinsic.Control.If(V.Local.bFileLocked)
+			F.Intrinsic.String.Build("File is already open. Please close and export again.{0}File: {1}",V.Ambient.NewLine,V.Local.sFileExport,V.Local.sMsg)
+			F.Intrinsic.UI.Msgbox(V.Local.sMsg,"File In Use")
+		F.Intrinsic.Control.Else
+			Gui.[V.Local.sForm].[V.Local.sControl].Export(V.Local.sFileExport,"csv")
+		F.Intrinsic.Control.EndIf
+		F.Intrinsic.Task.ShellExec(0,"",V.Local.sFileExport,"","",1)
+	F.Intrinsic.Control.EndIf
+	
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.MenuClickExport.End
+
+Program.Sub.MenuClickResetColumns.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	
+	F.Intrinsic.Control.SelectCase(V.Args.MenuName)
+		F.Intrinsic.Control.Case("CTXAPPROVED")
+			F.Global.Registry.AddValue(V.Caller.User,V.Caller.CompanyCode,"GVAPPROVED",4897,5000,False,"Serialize",False,0,-999.0,1/1/1980,12:00:00 AM,"")
+	F.Intrinsic.Control.EndSelect
+	
+	V.Global.bLoadData.Set(False)
+	F.Intrinsic.Control.CallSub(LoadCast)
+	
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.MenuClickResetColumns.End
+
+Program.Sub.LoadCast.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+
+	V.Local.sSQL.Declare
+	
+	F.Intrinsic.Control.If(V.DataTable.dtApproved.Exists)
+		F.Data.DataTable.Close("dtApproved")
+	F.Intrinsic.Control.EndIf
+	
+	'All
+	'F.Data.DataTable.CreateFromSQL("dtApproved","con","Select Cast(0 As Bit) As Sel,A.INID,E.CUSTOMER,E.PROJECT,E.PHASE,A.JOB,A.SUFFIX,RTrim(D.DESIGNATION) As DESIGNATION,RTrim(A.LINE_WC) AS LINE_WC,RTrim(A.POS_WC) AS POS_WC,RTrim(A.CONCRETE_CY) AS CONCRETE_CY,RTrim(A.STATUS) AS STATUS,RTrim(D.SPAN_NO) As SPAN_NO,RTrim(D.TYPE_MARK_NO) As TYPE_MARK_NO,A.QUANTITY,D.DESIGN,Cast(Replace(D.Design,'''','') As Float) As DESIGN_F,RTrim(D.CASTING) As CASTING,D.TOT_QTY,D.DEPRESSED_QTY,D.DEPRESSED_AT,D.MIN_REL_PSI,D.MIN_COMP_PSI,'' As SHEET_NO,Convert(F.User_4,SQL_Float) As PRICE,Convert(F.User_5,SQL_Float) As FREIGHT_PRICE,(D.Quantity*Cast(Replace(D.Design,'''','') As Float))*(Convert(F.User_4,SQL_Float)+Convert(F.User_5,SQL_Float)) As DESIGN_TOT_F,RTrim(C.ORDER_NO_IO) AS ORDER_NO_IO,RTrim(C.INVOICE_IO) AS INVOICE_IO,RTrim(C.ORDER_NO_SHIP) AS ORDER_NO_SHIP,RTrim(C.INVOICE_SHIP) AS INVOICE_SHIP From GAB_4897_INFO A Left Join GAB_4897_JOBS_MARKS B On A.INID = B.INID Left Join GAB_4897_SALE_MARKS C On A.INID = C.INID Left Join GAB_4897_INDEX_L D On B.LID = D.LID Left Join V_JOB_HEADER E On A.Job = E.Job And A.Suffix = E.Suffix Left Join V_Project_Master F On E.Project = F.Project;",True)
+	'Approved Only
+	F.Intrinsic.Control.If(V.Caller.Hook,=,11930,OR,V.Caller.Hook,=,35304,V.Caller.Hook,=,33004)
+		F.Intrinsic.String.Build("Select Cast(0 As Bit) As Sel,A.INID,B.LID,E.CUSTOMER,E.PROJECT,E.PHASE,A.JOB,A.SUFFIX,RTrim(D.DESIGNATION) As DESIGNATION,RTrim(A.LINE_WC) AS LINE_WC,RTrim(A.POS_WC) AS POS_WC,RTrim(A.CONCRETE_CY) AS CONCRETE_CY,RTrim(A.STATUS) AS STATUS,RTrim(D.SPAN_NO) As SPAN_NO,RTrim(D.TYPE_MARK_NO) As TYPE_MARK_NO,A.QUANTITY,D.DESIGN,D.Quantity*Cast(Replace(D.Design,'''','') As Float) As DESIGN_F,RTrim(D.CASTING) As CASTING,D.TOT_QTY,D.DEPRESSED_QTY,D.DEPRESSED_AT,D.MIN_REL_PSI,D.MIN_COMP_PSI,'' As SHEET_NO,Convert(F.User_4,SQL_Float) As PRICE,Convert(F.User_5,SQL_Float) As FREIGHT_PRICE,(D.Quantity*Cast(Replace(D.Design,'''','') As Float))*(Convert(F.User_4,SQL_Float)+Convert(F.User_5,SQL_Float)) As DESIGN_TOT_F,RTrim(C.ORDER_NO_IO) AS ORDER_NO_IO,RTrim(G.INVOICE_BATCH) AS INVOICE_IO,Case When RTrim(G.STATUS) = '' Then 'Sales Order Created' Else RTrim(G.STATUS) End AS STATUS_IO,RTrim(C.ORDER_NO_SHIP) AS ORDER_NO_SHIP,RTrim(H.INVOICE_BATCH) AS INVOICE_SHIP,Case When RTrim(H.STATUS) Is Null And C.ORDER_NO_SHIP <> '' Then 'Sales Order Created' Else RTrim(H.STATUS) End AS STATUS_SHIP From GAB_4897_INFO A Left Join GAB_4897_JOBS_MARKS B On A.INID = B.INID Left Join GAB_4897_SALE_MARKS C On A.INID = C.INID Left Join GAB_4897_INDEX_L D On B.LID = D.LID Left Join V_JOB_HEADER E On A.Job = E.Job And A.Suffix = E.Suffix Left Join V_Project_Master F On E.Project = F.Project Left Join (Select Order_No,If(Ivc_Batch = '',Invoice,Invoice+' ('+Ivc_Batch+')') As Invoice_Batch,Case Ln_Shp_Stat When 1 Then 'Shipped' When 2 Then 'Selected for Invoice' When 3 Then 'In Batch' End As Status From V_Shipment_Lines Union Select Order_No,Invoice As Invoice_Batch,'Posted' As Status From V_Order_Hist_Line) G On C.ORDER_NO_IO = G.ORDER_NO Left Join (Select Order_No,If(Ivc_Batch = '',Invoice,Invoice+' ('+Ivc_Batch+')') As Invoice_Batch,Case Ln_Shp_Stat When 1 Then 'Shipped' When 2 Then 'Selected for Invoice' When 3 Then 'In Batch' End As Status From V_Shipment_Lines Union Select Order_No,Invoice As Invoice_Batch,'Posted' As Status From V_Order_Hist_Line) H On C.ORDER_NO_SHIP = H.ORDER_NO Where A.STATUS = 'Approved' And ORDER_NO_IO = '{0}' OR A.STATUS = 'Approved' And ORDER_NO_SHIP = '{0}';",V.Args.SO,V.Local.sSQL)
+		F.Data.DataTable.CreateFromSQL("dtApproved","con",V.Local.sSQL,True)
+	F.Intrinsic.Control.Else
+		F.Data.DataTable.CreateFromSQL("dtApproved","con","Select Cast(0 As Bit) As Sel,A.INID,B.LID,E.CUSTOMER,E.PROJECT,E.PHASE,A.JOB,A.SUFFIX,RTrim(D.DESIGNATION) As DESIGNATION,RTrim(A.LINE_WC) AS LINE_WC,RTrim(A.POS_WC) AS POS_WC,RTrim(A.CONCRETE_CY) AS CONCRETE_CY,RTrim(A.STATUS) AS STATUS,RTrim(D.SPAN_NO) As SPAN_NO,RTrim(D.TYPE_MARK_NO) As TYPE_MARK_NO,A.QUANTITY,D.DESIGN,D.Quantity*Cast(Replace(D.Design,'''','') As Float) As DESIGN_F,RTrim(D.CASTING) As CASTING,D.TOT_QTY,D.DEPRESSED_QTY,D.DEPRESSED_AT,D.MIN_REL_PSI,D.MIN_COMP_PSI,'' As SHEET_NO,Convert(F.User_4,SQL_Float) As PRICE,Convert(F.User_5,SQL_Float) As FREIGHT_PRICE,(D.Quantity*Cast(Replace(D.Design,'''','') As Float))*(Convert(F.User_4,SQL_Float)+Convert(F.User_5,SQL_Float)) As DESIGN_TOT_F,RTrim(C.ORDER_NO_IO) AS ORDER_NO_IO,RTrim(G.INVOICE_BATCH) AS INVOICE_IO,Case When RTrim(G.STATUS) = '' Then 'Sales Order Created' Else RTrim(G.STATUS) End AS STATUS_IO,RTrim(C.ORDER_NO_SHIP) AS ORDER_NO_SHIP,RTrim(H.INVOICE_BATCH) AS INVOICE_SHIP,Case When RTrim(H.STATUS) Is Null And C.ORDER_NO_SHIP <> '' Then 'Sales Order Created' Else RTrim(H.STATUS) End AS STATUS_SHIP From GAB_4897_INFO A Left Join GAB_4897_JOBS_MARKS B On A.INID = B.INID Left Join GAB_4897_SALE_MARKS C On A.INID = C.INID Left Join GAB_4897_INDEX_L D On B.LID = D.LID Left Join V_JOB_HEADER E On A.Job = E.Job And A.Suffix = E.Suffix Left Join V_Project_Master F On E.Project = F.Project Left Join (Select Order_No,If(Ivc_Batch = '',Invoice,Invoice+' ('+Ivc_Batch+')') As Invoice_Batch,Case Ln_Shp_Stat When 1 Then 'Shipped' When 2 Then 'Selected for Invoice' When 3 Then 'In Batch' End As Status From V_Shipment_Lines Union Select Order_No,Invoice As Invoice_Batch,'Posted' As Status From V_Order_Hist_Line) G On C.ORDER_NO_IO = G.ORDER_NO Left Join (Select Order_No,If(Ivc_Batch = '',Invoice,Invoice+' ('+Ivc_Batch+')') As Invoice_Batch,Case Ln_Shp_Stat When 1 Then 'Shipped' When 2 Then 'Selected for Invoice' When 3 Then 'In Batch' End As Status From V_Shipment_Lines Union Select Order_No,Invoice As Invoice_Batch,'Posted' As Status From V_Order_Hist_Line) H On C.ORDER_NO_SHIP = H.ORDER_NO Where A.STATUS = 'Approved';",True)
+	F.Intrinsic.Control.EndIf
+	'Pull Sheet No
+	F.Data.Dictionary.CreateFromSQL("dSheetNo","con","Select C.INID,RTrim(B.Sea_Sheet_No) As Sea_Sheet_No From Gab_4897_Index_L A Join Gab_4897_Index_H B On A.HID = B.HID Join Gab_4897_Jobs_Marks C On A.LID = C.LID;")
+	F.Data.Dictionary.SetDefaultReturn("dSheetNo","")
+	F.Data.DataTable.FillFromDictionary("dtApproved","dSheetNo","INID","SHEET_NO")
+	F.Data.Dictionary.Close("dSheetNo")
+	
+	Gui.frmSales.GsGCApproved.AddGridviewFromDatatable("gvApproved","dtApproved")
+	Gui.frmSales.GsGCApproved.SuspendLayout()
+	Gui.frmSales.GsGCApproved.SetGridViewProperty("gvApproved","MultiSelect",True)
+	Gui.frmSales.GsGCApproved.SetGridViewProperty("gvApproved","Editable",True)
+	Gui.frmSales.GsGCApproved.SetGridViewProperty("gvApproved","ReadOnly",False)
+	Gui.frmSales.GsGCApproved.SetGridViewProperty("gvApproved","AllowSort",True)
+	Gui.frmSales.GsGCApproved.SetGridViewProperty("gvApproved","AllowFilter",True)
+	Gui.frmSales.GsGCApproved.SetGridViewProperty("gvApproved","OptionsDetailShowDetailTabs",False)
+	Gui.frmSales.GsGCApproved.SetGridViewProperty("gvApproved","OptionsViewShowGroupPanel",True)
+	Gui.frmSales.GsGCApproved.SetGridViewProperty("gvApproved","EnableAppearanceOddRow",True)
+	Gui.frmSales.GsGCApproved.SetGridViewProperty("gvApproved","ColumnPanelRowHeight",35)
+	
+	F.Intrinsic.Control.If(V.Caller.Hook,=,11930,OR,V.Caller.Hook,=,35304,V.Caller.Hook,=,33004)
+		Gui.frmSales.GsGCApproved.SetGridViewProperty("gvApproved","Editable",False)
+		Gui.frmSales.GsGCApproved.SetGridViewProperty("gvApproved","ReadOnly",True)
+		Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","Sel","Visible",False)
+	F.Intrinsic.Control.EndIf
+
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","INID","Visible",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","LID","Visible",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","CUSTOMER","Visible",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","JOB","Visible",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","SUFFIX","Visible",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DESIGN_F","Visible",False)
+	
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","CASTING","Visible",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","TOT_QTY","Visible",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DEPRESSED_QTY","Visible",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DEPRESSED_AT","Visible",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","MIN_REL_PSI","Visible",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","MIN_COMP_PSI","Visible",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","SHEET_NO","Visible",False)
+	
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","Sel","Caption","Select")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","INID","Caption","INID")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","LID","Caption","LID")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","CUSTOMER","Caption","Customer")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","Project","Caption","Project")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","Phase","Caption","Phase")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","JOB","Caption","Job")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","SUFFIX","Caption","Suffix")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DESIGNATION","Caption","Designation")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","LINE_WC","Caption","Line")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","POS_WC","Caption","Position")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","CONCRETE_CY","Caption","Concrete (CY)")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","SPAN_NO","Caption","Span No.")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","TYPE_MARK_NO","Caption","Type & Mark No.")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","QUANTITY","Caption","Quantity")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DESIGN","Caption","Design")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","CASTING","Caption","Cast")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","TOT_QTY","Caption","Total Qty")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DEPRESSED_QTY","Caption","Depressed Quan.")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DEPRESSED_AT","Caption","Depressed Height")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","MIN_REL_PSI","Caption","Minimum Release PSI")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","MIN_COMP_PSI","Caption","Min. Comp. 28 Days Strength PSI")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","SHEET_NO","Caption","Sheet No.")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","STATUS","Caption","Status")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","PRICE","Caption","Price")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","FREIGHT_PRICE","Caption","Freight Price")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DESIGN_TOT_F","Caption","Extension")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","ORDER_NO_IO","Caption","Order No (IO)")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","INVOICE_IO","Caption","Invoice (IO)")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","STATUS_IO","Caption","Status (IO)")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","ORDER_NO_SHIP","Caption","Order No (Ship)")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","INVOICE_SHIP","Caption","Invoice (Ship)")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","STATUS_SHIP","Caption","Status (Ship)")
+	
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","Sel","AllowEdit",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","INID","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","LID","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","CUSTOMER","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","Project","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","Phase","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","JOB","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","SUFFIX","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DESIGNATION","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","LINE_WC","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","POS_WC","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","CONCRETE_CY","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","SPAN_NO","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","TYPE_MARK_NO","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","QUANTITY","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DESIGN","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","CASTING","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","TOT_QTY","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DEPRESSED_QTY","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DEPRESSED_AT","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","MIN_REL_PSI","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","MIN_COMP_PSI","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","SHEET_NO","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","STATUS","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","PRICE","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","FREIGHT_PRICE","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DESIGN_TOT_F","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","ORDER_NO_IO","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","INVOICE_IO","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","STATUS_IO","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","ORDER_NO_SHIP","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","INVOICE_SHIP","AllowEdit",False)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","STATUS_SHIP","AllowEdit",False)
+	
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","Sel","ReadOnly",False)
+	
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","Sel","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","INID","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","LID","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","CUSTOMER","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","Project","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","Phase","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","JOB","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","SUFFIX","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DESIGNATION","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","LINE_WC","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","POS_WC","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","CONCRETE_CY","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","SPAN_NO","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","TYPE_MARK_NO","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","QUANTITY","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DESIGN","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","CASTING","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","TOT_QTY","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DEPRESSED_QTY","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DEPRESSED_AT","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","MIN_REL_PSI","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","MIN_COMP_PSI","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","SHEET_NO","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","STATUS","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","PRICE","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","FREIGHT_PRICE","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DESIGN_TOT_F","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","ORDER_NO_IO","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","INVOICE_IO","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","STATUS_IO","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","ORDER_NO_SHIP","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","INVOICE_SHIP","HeaderWordWrap","Wrap")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","STATUS_SHIP","HeaderWordWrap","Wrap")
+	
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","Sel","MinWidth","45")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","INID","MinWidth","65")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","LID","MinWidth","65")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","CUSTOMER","MinWidth","65")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","Project","MinWidth","65")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","Phase","MinWidth","65")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","JOB","MinWidth","65")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","SUFFIX","MinWidth","65")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DESIGNATION","MinWidth","95")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","LINE_WC","MinWidth","65")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","POS_WC","MinWidth","65")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","CONCRETE_CY","MinWidth","95")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","SPAN_NO","MinWidth","65")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","TYPE_MARK_NO","MinWidth","65")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","QUANTITY","MinWidth","65")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DESIGN","MinWidth","85")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","CASTING","MinWidth","85")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","TOT_QTY","MinWidth","65")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DEPRESSED_QTY","MinWidth","100")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DEPRESSED_AT","MinWidth","100")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","MIN_REL_PSI","MinWidth","85")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","MIN_COMP_PSI","MinWidth","115")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","SHEET_NO","MinWidth","65")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","STATUS","MinWidth","115")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","PRICE","MinWidth","65")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","FREIGHT_PRICE","MinWidth","85")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DESIGN_TOT_F","MinWidth","85")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","ORDER_NO_IO","MinWidth","65")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","INVOICE_IO","MinWidth","65")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","STATUS_IO","MinWidth","65")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","ORDER_NO_SHIP","MinWidth","65")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","INVOICE_SHIP","MinWidth","65")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","STATUS_SHIP","MinWidth","65")
+	
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","Sel","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","INID","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","LID","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","CUSTOMER","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","Project","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","Phase","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","JOB","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","SUFFIX","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DESIGNATION","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","LINE_WC","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","POS_WC","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","CONCRETE_CY","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","SPAN_NO","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","TYPE_MARK_NO","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","QUANTITY","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DESIGN","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","CASTING","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","TOT_QTY","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DEPRESSED_QTY","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DEPRESSED_AT","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","MIN_REL_PSI","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","MIN_COMP_PSI","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","SHEET_NO","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","STATUS","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","PRICE","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","FREIGHT_PRICE","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DESIGN_TOT_F","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","ORDER_NO_IO","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","INVOICE_IO","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","STATUS_IO","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","ORDER_NO_SHIP","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","INVOICE_SHIP","HeaderFontBold",True)
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","STATUS_SHIP","HeaderFontBold",True)
+	
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","Sel","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","INID","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","LID","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","CUSTOMER","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","Project","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","Phase","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","JOB","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","SUFFIX","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DESIGNATION","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","LINE_WC","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","POS_WC","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","CONCRETE_CY","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","SPAN_NO","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","TYPE_MARK_NO","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","QUANTITY","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DESIGN","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","CASTING","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","TOT_QTY","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DEPRESSED_QTY","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DEPRESSED_AT","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","MIN_REL_PSI","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","MIN_COMP_PSI","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","SHEET_NO","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","STATUS","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","PRICE","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","FREIGHT_PRICE","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DESIGN_TOT_F","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","ORDER_NO_IO","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","INVOICE_IO","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","STATUS_IO","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","ORDER_NO_SHIP","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","INVOICE_SHIP","HeaderHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","STATUS_SHIP","HeaderHAlignment","Center")
+	
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","Sel","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","INID","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","LID","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","CUSTOMER","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","Project","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","Phase","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","JOB","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","SUFFIX","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DESIGNATION","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","LINE_WC","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","POS_WC","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","CONCRETE_CY","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","SPAN_NO","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","TYPE_MARK_NO","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","QUANTITY","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DESIGN","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","CASTING","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","TOT_QTY","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DEPRESSED_QTY","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DEPRESSED_AT","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","MIN_REL_PSI","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","MIN_COMP_PSI","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","SHEET_NO","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","STATUS","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","PRICE","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","FREIGHT_PRICE","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DESIGN_TOT_F","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","ORDER_NO_IO","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","INVOICE_IO","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","STATUS_IO","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","ORDER_NO_SHIP","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","INVOICE_SHIP","CellHAlignment","Center")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","STATUS_SHIP","CellHAlignment","Center")
+	
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","ORDER_NO_IO","CellForeColor","Blue")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","INVOICE_IO","CellForeColor","Blue")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","ORDER_NO_SHIP","CellForeColor","Blue")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","INVOICE_SHIP","CellForeColor","Blue")
+
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","CONCRETE_CY","DisplayCustomNumeric","#,###,##0.0000")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","SPAN_NO","DisplayCustomNumeric","#,###,##0.0000")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","QUANTITY","DisplayCustomNumeric","#,###,##0.0000")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","TOT_QTY","DisplayCustomNumeric","#,###,##0.0000")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","PRICE","DisplayCustomNumeric","#,###,##0.0000")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","FREIGHT_PRICE","DisplayCustomNumeric","#,###,##0.0000")
+	Gui.frmSales.GsGCApproved.SetColumnProperty("gvApproved","DESIGN_TOT_F","DisplayCustomNumeric","#,###,##0.0000")
+	
+	Gui.frmSales.GsGCApproved.AddSummaryItem("gvApproved","Project","SPAN_NO","Count","Total: ","","")
+	Gui.frmSales.GsGCApproved.AddSummaryItem("gvApproved","CONCRETE_CY","CONCRETE_CY","Sum","","","n4")
+	Gui.frmSales.GsGCApproved.AddSummaryItem("gvApproved","QUANTITY","QUANTITY","Sum","","","n4")
+	Gui.frmSales.GsGCApproved.AddSummaryItem("gvApproved","DESIGN_TOT_F","QUANTITY","Sum","","","n4")
+	
+	'Lock Select Cell if Both Invoice Only and Ship SO exists - Showing, because the Order has not been posted
+	
+	Gui.frmSales.GsGCApproved.ResumeLayout()
+	Gui.frmSales.GsGCApproved.MainView("gvApproved")
+	
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.LoadCast.End
+
+Program.Sub.GsGCApproved_RowCellClick.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	
+	V.Local.sSO.Declare
+	V.Local.sCustomer.Declare
+	V.Local.sParams.Declare
+	V.Local.sInvoice.Declare
+	
+	F.Intrinsic.Control.SelectCase(V.Args.Column)
+		F.Intrinsic.Control.CaseAny("ORDER_NO_IO","ORDER_NO_SHIP")
+			Gui.frmSales.GsGCApproved.GetCellValueByColumnName("gvApproved",V.Args.Column,V.Args.RowIndex,V.Local.sSO)
+			Gui.frmSales.GsGCApproved.GetCellValueByColumnName("gvApproved","Customer",V.Args.RowIndex,V.Local.sCustomer)
+			F.Intrinsic.Control.If(V.Local.sSO.Trim,<>,"")
+				F.Intrinsic.String.Build("{0}!*!O!*!{1}",V.Local.sSO,V.Local.sCustomer,V.Local.sParams)
+				F.Global.General.CallWrapperSync(200000,V.Local.sParams)
+			F.Intrinsic.Control.EndIf
+			
+		F.Intrinsic.Control.CaseAny("INVOICE_IO","INVOICE_SHIP")
+			Gui.frmSales.GsGCApproved.GetCellValueByColumnName("gvApproved",V.Args.Column,V.Args.RowIndex,V.Local.sInvoice)
+			F.Intrinsic.Control.If(V.Local.sInvoice.Trim,<>,"")
+				F.Global.General.CallWrapperSync(200700,V.Local.sInvoice.Left6)
+			F.Intrinsic.Control.EndIf
+		
+	F.Intrinsic.Control.EndSelect
+
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.GsGCApproved_RowCellClick.End
+
+Program.Sub.cmdCreateSOIO_Click.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	
+	V.Local.sFreight.Declare
+	V.Local.sLine.Declare
+	V.Local.sFilter.Declare
+	V.Local.fQtyOrdered.Declare
+	V.Local.sQtyOrdered.Declare
+	V.Local.sQuotedPrice.Declare
+	V.Local.sSQL.Declare
+	v.Local.sNumber.Declare
+	V.Local.iCnt.Declare
+	
+	F.Intrinsic.UI.InvokeWaitDialog("Creating Sales Order (Invoice Only)")
+	
+	F.Data.DataView.Create("dtApproved","dvApproved",22,"Sel = True And ORDER_NO_IO Is Null And ORDER_NO_SHIP Is Null","")
+	F.Intrinsic.Control.If(V.DataView.dtApproved!dvApproved.RowCount,<>,0)
+		F.Data.DataView.ToDataTableDistinct("dtApproved","dvApproved","dtCreate","Customer*!*Project*!*Phase",True)
+		F.Intrinsic.Control.If(V.DataTable.dtCreate.RowCount,=,1)
+			'Create Header Record
+			F.Data.DataTable.AddRow("ORDUPL","Transaction","O","CustomerNo",V.DataView.dtApproved!dvApproved(0).Customer!FIeldValTrim,"OrderDueDate",V.Ambient.Date.FormatYYYYMMDD,"OrderDate",V.Ambient.Date.FormatYYYYMMDD,"OrderType","X")
+			'Create Line Record
+			'Price
+			F.Intrinsic.String.Format(V.DataView.dtApproved!dvApproved(0).Price!FIeldVal,"0000000000.000000",V.Local.sQuotedPrice)
+			F.Intrinsic.String.Replace(V.Local.sQuotedPrice,".","",V.Local.sQuotedPrice)
+			'Order Qty
+			F.Intrinsic.String.Build("Sel = True And Customer = '{0}' And Project = '{1}' And Phase = '{2}' And Order_No_IO Is Null And ORDER_NO_SHIP Is Null",V.DataView.dtApproved!dvApproved(0).Customer!FIeldValTrim,V.DataView.dtApproved!dvApproved(0).Project!FIeldValTrim,V.DataView.dtApproved!dvApproved(0).Phase!FIeldValTrim,V.Local.sFilter)
+			F.Data.DataTable.Compute("dtApproved","Sum(DESIGN_F)",V.Local.sFilter,V.Local.fQtyOrdered)
+			F.Intrinsic.String.Format(V.Local.fQtyOrdered,"000000000.0000",V.Local.sQtyOrdered)
+			F.Intrinsic.String.Replace(V.Local.sQtyOrdered,".","",V.Local.sQtyOrdered)
+			F.Data.DataTable.AddRow("ORDUPLLines","LineNumber","001","QtyOrdered",V.Local.sQtyOrdered,"PartNumber","CAST","PartLoc","","QuotedPrice",V.Local.sQuotedPrice,"PartDesc","CAST","LineOrderDate",V.Ambient.Date.FormatYYYYMMDD,"LinePromiseDate",V.Ambient.Date.FormatYYYYMMDD,"LineType","S")
+			'Call Upload
+			F.Intrinsic.Control.CallSub(ORDUPLGetWebOrderDirectory)
+			F.Intrinsic.Control.CallSub(ORDUPLCreateFile)
+			F.Intrinsic.Control.CallSub(ORDUPLSync)
+			'Get last number created
+			F.Intrinsic.String.Build("Select Top 1 Order_No From V_Order_Header Where Date_Order = '{0}' And Last_Chg_By = '{1}' And Last_Chg_Pgm = 'ORD065' Order By Order_No Desc;",V.Ambient.Date.PervasiveDate,V.Caller.User,V.Local.sSql)
+			F.ODBC.Connection!con.ExecuteAndReturn(V.Local.sSQL,V.Local.sNumber)
+			F.Intrinsic.Control.For(V.Local.iCnt,0,V.DataView.dtApproved!dvApproved.RowCount--,1)
+				F.Intrinsic.String.Build("Select * From GAB_4897_SALE_MARKS Where INID = {0} And LID = {1};",V.DataView.dtApproved!dvApproved(V.Local.iCnt).INID!FieldVal,V.DataView.dtApproved!dvApproved(V.Local.iCnt).INID!FieldVal,V.Local.sSQL)
+				F.Data.DataTable.CreateFromSQL("dtSaleMarks","con",V.Local.sSQL,True)
+				F.Data.DataTable.AddRow("dtSaleMarks","SMID",0,"INID",V.DataView.dtApproved!dvApproved(V.Local.iCnt).INID!FieldVal,"LID",V.DataView.dtApproved!dvApproved(V.Local.iCnt).LID!FieldVal,"ORDER_NO_IO",V.Local.sNumber)
+				F.Data.DataTable.SaveToDB("dtSaleMarks","con","GAB_4897_SALE_MARKS","SMID")
+				F.Data.DataTable.Close("dtSaleMarks")
+			F.Intrinsic.Control.Next(V.Local.iCnt)
+			F.Data.DataView.Close("dtApproved","dvApproved")
+			F.Intrinsic.Control.CallSub(LoadCast)
+		F.Intrinsic.Control.Else
+			F.Intrinsic.UI.Msgbox("You can only create a Sales Order for a unique Customer, Project and Phase. Please reselect Castings and try again.","Error")
+			F.Intrinsic.Control.ExitSub
+		F.Intrinsic.Control.EndIf
+		F.Data.DataTable.Close("dtCreate")
+	F.Intrinsic.Control.Else
+		F.Data.DataView.Close("dtApproved","dvApproved")
+	F.Intrinsic.Control.EndIf
+	
+	F.Intrinsic.UI.CloseWaitDialog
+	
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.cmdCreateSOIO_Click.End
+
+Program.Sub.cmdCreateSOSHIP_Click.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	
+	V.Local.sFreight.Declare
+	V.Local.sLine.Declare
+	V.Local.sFilter.Declare
+	V.Local.fQtyOrdered.Declare
+	V.Local.sQtyOrdered.Declare
+	V.Local.sQuotedPrice.Declare
+	V.Local.sSQL.Declare
+	v.Local.sNumber.Declare
+	V.Local.iCnt.Declare
+	
+	F.Intrinsic.UI.InvokeWaitDialog("Creating Sales Order (Ship)")
+	
+	F.Data.DataView.Create("dtApproved","dvApproved",22,"Sel = True And ORDER_NO_IO Is Not Null And ORDER_NO_SHIP Is Null","")
+	F.Intrinsic.Control.If(V.DataView.dtApproved!dvApproved.RowCount,<>,0)
+		F.Data.DataView.ToDataTableDistinct("dtApproved","dvApproved","dtCreate","Customer*!*Project*!*Phase",True)
+		F.Intrinsic.Control.If(V.DataTable.dtCreate.RowCount,=,1)
+			'Call Web Importer
+			F.Intrinsic.String.Format(V.DataView.dtApproved!dvApproved(0).Freight_Price!FIeldVal,"00000000.00",V.Local.sFreight)
+			F.Intrinsic.String.Replace(V.Local.sFreight,".","",V.Local.sFreight)
+			'Create Header Record
+			F.Data.DataTable.AddRow("ORDUPL","Transaction","O","CustomerNo",V.DataView.dtApproved!dvApproved(0).Customer!FIeldValTrim,"Freight",V.Local.sFreight,"OrderDueDate",V.Ambient.Date.FormatYYYYMMDD,"OrderDate",V.Ambient.Date.FormatYYYYMMDD,"OrderType","")
+			'Create Line Record
+			'Price
+'			F.Intrinsic.String.Format(V.DataView.dtApproved!dvApproved(0).Price!FIeldVal,"0000000000.000000",V.Local.sQuotedPrice)
+			F.Intrinsic.String.Format("0","0000000000.000000",V.Local.sQuotedPrice)
+			F.Intrinsic.String.Replace(V.Local.sQuotedPrice,".","",V.Local.sQuotedPrice)
+			'Order Qty
+			F.Intrinsic.String.Build("Sel = True And Customer = '{0}' And Project = '{1}' And Phase = '{2}' And Order_No_IO Is Not Null And ORDER_NO_SHIP Is Null",V.DataView.dtApproved!dvApproved(0).Customer!FIeldValTrim,V.DataView.dtApproved!dvApproved(0).Project!FIeldValTrim,V.DataView.dtApproved!dvApproved(0).Phase!FIeldValTrim,V.Local.sFilter)
+			F.Data.DataTable.Compute("dtApproved","Sum(DESIGN_F)",V.Local.sFilter,V.Local.fQtyOrdered)
+			F.Intrinsic.String.Format(V.Local.fQtyOrdered,"000000000.0000",V.Local.sQtyOrdered)
+			F.Intrinsic.String.Replace(V.Local.sQtyOrdered,".","",V.Local.sQtyOrdered)
+			F.Data.DataTable.AddRow("ORDUPLLines","LineNumber","001","QtyOrdered",V.Local.sQtyOrdered,"PartNumber","CAST","PartLoc","","QuotedPrice",V.Local.sQuotedPrice,"PartDesc","CAST","LineOrderDate",V.Ambient.Date.FormatYYYYMMDD,"LinePromiseDate",V.Ambient.Date.FormatYYYYMMDD,"LineType","S","PriceFlag","1")
+			'Call Upload
+			F.Intrinsic.Control.CallSub(ORDUPLGetWebOrderDirectory)
+			F.Intrinsic.Control.CallSub(ORDUPLCreateFile)
+			F.Intrinsic.Control.CallSub(ORDUPLSync)
+			'Get last number created
+			F.Intrinsic.String.Build("Select Top 1 Order_No From V_Order_Header Where Date_Order = '{0}' And Last_Chg_By = '{1}' And Last_Chg_Pgm = 'ORDUP3' Order By Order_No Desc;",V.Ambient.Date.PervasiveDate,V.Caller.User,V.Local.sSql)
+			F.ODBC.Connection!con.ExecuteAndReturn(V.Local.sSQL,V.Local.sNumber)
+			F.Intrinsic.Control.For(V.Local.iCnt,0,V.DataView.dtApproved!dvApproved.RowCount--,1)
+				F.Intrinsic.String.Build("Select * From GAB_4897_SALE_MARKS Where INID = {0} And LID = {1};",V.DataView.dtApproved!dvApproved(V.Local.iCnt).INID!FieldVal,V.DataView.dtApproved!dvApproved(V.Local.iCnt).LID!FieldVal,V.Local.sSQL)
+				F.Data.DataTable.CreateFromSQL("dtSaleMarks","con",V.Local.sSQL,True)
+				F.Data.DataTable.SetValue("dtSaleMarks",-1,"ORDER_NO_SHIP",V.Local.sNumber)
+				F.Data.DataTable.SaveToDB("dtSaleMarks","con","GAB_4897_SALE_MARKS","SMID")
+				F.Data.DataTable.Close("dtSaleMarks")
+			F.Intrinsic.Control.Next(V.Local.iCnt)
+			F.Data.DataView.Close("dtApproved","dvApproved")
+			F.Intrinsic.Control.CallSub(LoadCast)
+		F.Intrinsic.Control.Else
+			F.Intrinsic.UI.Msgbox("You can only create a Sales Order for a unique Customer, Project and Phase. Please reselect Castings and try again.","Error")
+			F.Intrinsic.Control.ExitSub
+		F.Intrinsic.Control.EndIf
+		F.Data.DataTable.Close("dtCreate")
+	F.Intrinsic.Control.Else
+		F.Data.DataView.Close("dtApproved","dvApproved")
+	F.Intrinsic.Control.EndIf
+	
+	F.Intrinsic.UI.CloseWaitDialog
+	
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.cmdCreateSOSHIP_Click.End
+
+Program.Sub.Serialize.Start
+Program.Sub.Serialize.End
+
+Program.Sub.Deserialize.Start
+Program.Sub.Deserialize.End
